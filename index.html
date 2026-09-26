@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07111b">
+  <meta name="description" content="MECApex — ingénierie mécanique, mobilité, aéro et robotique.">
+  <title>MECApex — Engineering in motion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div class="site-noise" aria-hidden="true"></div>
+  <div class="video-layer video-layer--ambient" aria-hidden="true">
+    <video autoplay muted loop playsinline preload="metadata" poster="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=70">
+      <source src="https://cdn.pixabay.com/video/2021/10/12/91744-636709154_large.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="video-layer video-layer--mobility" aria-hidden="true">
+    <video muted loop playsinline preload="none">
+      <source src="https://cdn.coverr.co/videos/coverr-overhead-view-of-the-highway-8903/1080p.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <div class="hud-grid" aria-hidden="true"></div>
+  <div class="hud-scan" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="MECApex accueil">
+      <span class="brand-mark"><i></i><i></i></span>
+      <span class="brand-word">MECA<span>pex</span></span>
+    </a>
+    <div class="topbar-meta">
+      <span>ENGINEERING / MOTION / SYSTEMS</span>
+      <span class="status-dot"></span>
+      <span>ONLINE</span>
+    </div>
+  </header>
+
+  <aside class="rail" aria-label="Navigation principale">
+    <a class="rail-item active" href="#top" data-label="Accueil"><span>01</span><b>⌂</b></a>
+    <a class="rail-item" href="#mobility" data-label="Mobilité"><span>02</span><b>↗</b></a>
+    <a class="rail-item" href="#aero" data-label="Aéro"><span>03</span><b>◌</b></a>
+    <a class="rail-item" href="#robotics" data-label="Robotique"><span>04</span><b>◇</b></a>
+    <a class="rail-item" href="#prototypes" data-label="Prototypes"><span>05</span><b>▣</b></a>
+  </aside>
+
+  <main id="top">
+    <section class="hero section">
+      <div class="hero-left">
+        <p class="eyebrow">ARTICLE / 09.2026 / MECAPEX LAB</p>
+        <h1>ENGINEERING<br><em>IN MOTION</em></h1>
+        <p class="lead">Conception mécanique, mobilité avancée, systèmes aéro et robotique appliquée.</p>
+        <div class="hero-actions">
+          <a class="cta" href="#prototypes"><span>EXPLORER LES PROTOTYPES</span><b>↗</b></a>
+          <span class="micro">SCROLL TO DISCOVER / 01—05</span>
+        </div>
+      </div>
+
+      <div class="hero-core">
+        <div class="core-orbit core-orbit--one"></div>
+        <div class="core-orbit core-orbit--two"></div>
+        <div class="core-image">
+          <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1100&q=82" alt="Circuit électronique et ingénierie">
+          <div class="core-label">SYSTEM CORE<br><strong>MX—01</strong></div>
+        </div>
+      </div>
+
+      <div class="hero-right glass-panel">
+        <div class="panel-head"><span>PROTOTYPES EN DÉVELOPPEMENT</span><b>LIVE</b></div>
+        <div class="prototype-row"><i class="cyan"></i><span>PROTO 01</span><small>MECA DRIVE</small><b>●</b></div>
+        <div class="prototype-row"><i class="violet"></i><span>PROTO 02</span><small>AERO CORE</small><b>●</b></div>
+        <div class="prototype-row"><i class="yellow"></i><span>PROTO 03</span><small>SWARM UNIT</small><b>●</b></div>
+        <div class="prototype-row"><i class="blue"></i><span>PROTO 04</span><small>ENERGY LOOP</small><b>●</b></div>
+      </div>
+    </section>
+
+    <section class="cards-section section" id="mobility">
+      <div class="section-title">
+        <span>01 / MOBILITY</span>
+        <h2>DESIGNING<br><em>VEHICLES</em></h2>
+      </div>
+      <div class="cards-grid">
+        <article class="media-card tilt-card">
+          <div class="media-frame">
+            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=80" alt="Véhicule sportif">
+            <div class="media-shine"></div>
+          </div>
+          <div class="card-copy"><span>MX-MOBILITY</span><h3>CONCEPT<br>VEHICLES</h3><p>Architecture légère / aérodynamique / propulsion.</p></div>
+          <a href="#contact" class="card-link">OPEN MODULE ↗</a>
+        </article>
+
+        <article class="media-card tilt-card" id="aero">
+          <div class="media-frame">
+            <video muted loop playsinline preload="none" poster="https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&w=1400&q=80">
+              <source src="https://cdn.coverr.co/videos/coverr-aerial-view-of-beautiful-resort-4739/1080p.mp4" type="video/mp4">
+            </video>
+            <div class="media-shine"></div>
+          </div>
+          <div class="card-copy"><span>MX-AERO</span><h3>DYNAMIC<br>AEROSYSTEMS</h3><p>Flux / propulsion / thermal management.</p></div>
+          <a href="#contact" class="card-link">OPEN MODULE ↗</a>
+        </article>
+
+        <article class="media-card tilt-card" id="robotics">
+          <div class="media-frame">
+            <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1400&q=82" alt="Robot futuriste">
+            <div class="media-shine"></div>
+          </div>
+          <div class="card-copy"><span>MX-ROBOTICS</span><h3>MICRO<br>ROBOTICS</h3><p>Essaims / inspection / micro-assemblage.</p></div>
+          <a href="#contact" class="card-link">OPEN MODULE ↗</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="split-section section" id="prototypes">
+      <div class="glass-panel telemetry">
+        <div class="panel-head"><span>TELEMETRY / MX—CORE</span><b>ACTIVE</b></div>
+        <div class="telemetry-row"><span>THRUST</span><strong>82.4</strong><i><b style="width:82%"></b></i></div>
+        <div class="telemetry-row"><span>THERMAL</span><strong>64.1</strong><i><b style="width:64%"></b></i></div>
+        <div class="telemetry-row"><span>EFFICIENCY</span><strong>91.8</strong><i><b style="width:92%"></b></i></div>
+        <div class="telemetry-row"><span>STABILITY</span><strong>97.2</strong><i><b style="width:97%"></b></i></div>
+      </div>
+
+      <div class="statement">
+        <p class="eyebrow">MECApex / LAB NOTE</p>
+        <h2>FROM<br><em>IDEA</em><br>TO SYSTEM.</h2>
+        <p>Une vitrine technologique pensée comme un système vivant : prototypes, données et médias se rencontrent dans une interface immersive.</p>
+        <a class="cta" href="#contact"><span>PARLER DU PROJET</span><b>↗</b></a>
+      </div>
+    </section>
+
+    <section class="showcase section">
+      <div class="showcase-media">
+        <video muted loop playsinline preload="none" poster="https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=1600&q=80">
+          <source src="https://cdn.pixabay.com/video/2021/10/12/91744-636709154_large.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="showcase-overlay">
+        <span>MX / DIGITAL SYSTEMS</span>
+        <h2>THE MACHINE<br><em>IS THE INTERFACE.</em></h2>
+      </div>
+    </section>
+
+    <section class="contact section" id="contact">
+      <div>
+        <p class="eyebrow">MECApex / CONTACT</p>
+        <h2>BUILD THE<br><em>NEXT SYSTEM.</em></h2>
+      </div>
+      <a class="contact-mail" href="mailto:contact@mecapex.com">contact@mecapex.com ↗</a>
+    </section>
+  </main>
+
+  <footer>
+    <span>© 2026 MECApex</span>
+    <span>ENGINEERING / MOBILITY / AERO / ROBOTICS</span>
+    <span>MEDIA SOURCES LISTED IN /sources.md</span>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
