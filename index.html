@@ -24,8 +24,6 @@
             padding: 0;
         }
 
-        /* Le fond sombre est sur html uniquement : body reste transparent
-           pour ne pas recouvrir la vidéo */
         html {
             width: 100%;
             min-height: 100%;
@@ -65,11 +63,21 @@
             object-fit: cover;
         }
 
-        /* Vignettage sombre */
+        /* --- CANVAS DES PARTICULES 3D --- */
+        #wave-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Vignettage sombre (placé après le canvas dans le HTML) */
         .bg-overlay {
             position: fixed;
             inset: 0;
-            background: radial-gradient(circle at center, rgba(11, 15, 25, 0.15) 20%, rgba(5, 8, 15, 0.7) 80%, rgba(0, 0, 0, 0.92) 100%);
+            background: radial-gradient(circle at center, rgba(11, 15, 25, 0.1) 25%, rgba(5, 8, 15, 0.6) 80%, rgba(0, 0, 0, 0.9) 100%);
             z-index: -1;
             pointer-events: none;
         }
@@ -85,22 +93,23 @@
             align-items: stretch;
         }
 
-        /* --- GLASSMORPHISME --- */
+        /* --- CADRES TRANSPARENTS --- */
         .glass-panel {
-            background: rgba(15, 23, 42, 0.25);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4),
-                        inset 0 0 10px rgba(255, 255, 255, 0.05);
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
             border-radius: 16px;
             transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         .glass-panel:hover {
             animation: shake 0.4s ease-in-out infinite alternate;
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .glass-panel h1, .glass-panel h2, .glass-panel p, .glass-panel span, .glass-panel li {
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
         }
 
         @keyframes shake {
@@ -200,16 +209,26 @@
             line-height: 1.3;
             font-weight: normal;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .hero-description {
             font-size: 14px;
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255, 255, 255, 0.9);
             max-width: 650px;
             line-height: 1.4;
+        }
+
+        .hero-video {
+            width: 100%;
+            height: 220px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-top: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            display: block;
         }
 
         .cards-grid {
@@ -236,17 +255,18 @@
 
         .card-desc {
             font-size: 13px;
-            color: rgba(255, 255, 255, 0.75);
+            color: rgba(255, 255, 255, 0.85);
         }
 
-        .card-img-placeholder {
+        .card-video {
             width: 100%;
-            height: 120px;
+            height: 140px;
             border-radius: 10px;
             object-fit: cover;
             margin-top: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             background: rgba(0, 0, 0, 0.3);
+            display: block;
         }
 
         /* --- PANNEAU DROIT --- */
@@ -321,7 +341,6 @@
             .side-panel { width: 100%; }
         }
 
-        /* Respect des préférences d'accessibilité */
         @media (prefers-reduced-motion: reduce) {
             .floating-window-1, .floating-window-2, .glass-panel:hover {
                 animation: none;
@@ -331,13 +350,16 @@
 </head>
 <body>
 
-    <!-- VIDÉO DE FOND : URL directe Cloudinary (pas le lecteur embed) -->
+    <!-- VIDÉO DE FOND -->
     <div class="video-bg-container">
-      <video id="bgVideo" autoplay muted loop playsinline preload="auto">
+        <video id="bgVideo" autoplay muted loop playsinline preload="auto">
             <source src="https://res.cloudinary.com/ljye26cz/video/upload/istockphoto-1938652864-640_adpp_is.mp4" type="video/mp4">
             <source src="https://res.cloudinary.com/ljye26cz/video/upload/istockphoto-1938652864-640_adpp_is.webm" type="video/webm">
         </video>
     </div>
+
+    <!-- PARTICULES 3D EN FORME DE VAGUES -->
+    <canvas id="wave-canvas"></canvas>
 
     <div class="bg-overlay"></div>
 
@@ -361,16 +383,22 @@
                 <p class="hero-description">
                     Micro-assemblage robotisé exploitant une lévitation magnétique haute fréquence et une cinématique de nouvelle génération.
                 </p>
+                <video class="hero-video" autoplay muted loop playsinline preload="auto">
+                    <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790712468/istockphoto-1376146865-640_adpp_is.mp4" type="video/mp4">
+                </video>
             </section>
 
             <div class="cards-grid">
+
                 <article class="info-card glass-panel floating-window-2">
                     <div>
                         <span class="tag-category">MOBILITÉ</span>
                         <h2 class="card-title">Véhicules de concept sans carénage</h2>
                         <p class="card-desc">Prototypage rapide à turbine intégrée.</p>
                     </div>
-                    <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80" alt="Concept Vehicle" class="card-img-placeholder">
+                    <video class="card-video" autoplay muted loop playsinline preload="auto">
+                        <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790712606/istockphoto-2205951073-640_adpp_is.mp4" type="video/mp4">
+                    </video>
                 </article>
 
                 <article class="info-card glass-panel floating-window-1">
@@ -379,8 +407,11 @@
                         <h2 class="card-title">Turbines dynamiques à états gazeux</h2>
                         <p class="card-desc">Flux thermiques optimisés par IA.</p>
                     </div>
-                    <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="Turbine" class="card-img-placeholder">
+                    <video class="card-video" autoplay muted loop playsinline preload="auto">
+                        <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790712575/istockphoto-2195066165-640_adpp_is.mp4" type="video/mp4">
+                    </video>
                 </article>
+
             </div>
 
         </main>
@@ -409,16 +440,134 @@
 
     </div>
 
+    <!-- three.js (bibliothèque 3D) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
     <script>
-        // Certains navigateurs bloquent l'autoplay : on force la lecture
-        // et on la relance au premier contact de l'utilisateur si besoin.
-        const v = document.getElementById('bgVideo');
-        v.muted = true;
-        v.play().catch(() => {
-            ['click', 'touchstart', 'scroll'].forEach(evt =>
-                window.addEventListener(evt, () => v.play(), { once: true })
-            );
+        // ===== LECTURE FORCÉE DE TOUTES LES VIDÉOS =====
+        const videos = document.querySelectorAll('video');
+        videos.forEach(v => {
+            v.muted = true;
+            v.play().catch(() => {
+                ['click', 'touchstart', 'scroll'].forEach(evt =>
+                    window.addEventListener(evt, () => v.play(), { once: true })
+                );
+            });
         });
+
+        // ===== PARTICULES 3D : VAGUES DE MER =====
+        (function () {
+            if (typeof THREE === 'undefined') return;
+
+            // --- Réglages ---
+            const FIELD_WIDTH  = 1000;   // largeur du champ (unités 3D)
+            const FIELD_DEPTH  = 5000;   // longueur du champ (unités 3D)
+            const isMobile     = window.innerWidth < 768;
+            const COLS         = isMobile ? 50  : 80;    // particules en largeur
+            const ROWS         = isMobile ? 160 : 260;   // particules en profondeur
+            const PARTICLE_SIZE = isMobile ? 5 : 4;
+            const PARTICLE_COLOR = 0xd1d5db;             // gris clair
+            const WAVE_SPEED   = 1;                      // vitesse des vagues
+            const WAVE_HEIGHT  = 1;                      // amplitude des vagues
+
+            const canvas = document.getElementById('wave-canvas');
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: false });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setClearColor(0x000000, 0);
+
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0b0f19, 900, 4200);
+
+            const camera = new THREE.PerspectiveCamera(60, 1, 1, 6000);
+            camera.position.set(0, 230, 700);
+
+            // Texture ronde pour les particules
+            const sprite = document.createElement('canvas');
+            sprite.width = sprite.height = 64;
+            const ctx = sprite.getContext('2d');
+            const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+            grad.addColorStop(0, 'rgba(255,255,255,1)');
+            grad.addColorStop(0.4, 'rgba(255,255,255,0.8)');
+            grad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 64, 64);
+            const texture = new THREE.CanvasTexture(sprite);
+
+            // Géométrie : grille de points
+            const count = COLS * ROWS;
+            const positions = new Float32Array(count * 3);
+            const baseX = new Float32Array(count);
+            const baseZ = new Float32Array(count);
+
+            let i = 0;
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const x = (c / (COLS - 1) - 0.5) * FIELD_WIDTH;
+                    const z = 500 - (r / (ROWS - 1)) * FIELD_DEPTH;
+                    baseX[i] = x;
+                    baseZ[i] = z;
+                    positions[i * 3]     = x;
+                    positions[i * 3 + 1] = 0;
+                    positions[i * 3 + 2] = z;
+                    i++;
+                }
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const material = new THREE.PointsMaterial({
+                color: PARTICLE_COLOR,
+                size: PARTICLE_SIZE,
+                map: texture,
+                transparent: true,
+                opacity: 0.85,
+                depthWrite: false,
+                sizeAttenuation: true
+            });
+
+            const points = new THREE.Points(geometry, material);
+            scene.add(points);
+
+            function resize() {
+                const w = window.innerWidth;
+                const h = window.innerHeight;
+                renderer.setSize(w, h, false);
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const t = clock.getElapsedTime() * WAVE_SPEED;
+                const pos = geometry.attributes.position.array;
+
+                for (let k = 0; k < count; k++) {
+                    const x = baseX[k];
+                    const z = baseZ[k];
+                    // Somme de plusieurs ondes pour un rendu de mer
+                    const y =
+                        Math.sin(x * 0.012 + t * 1.1) * 28 +
+                        Math.sin(z * 0.006 + t * 1.6) * 48 +
+                        Math.sin((x + z) * 0.008 + t * 0.8) * 22 +
+                        Math.cos(x * 0.02 - z * 0.004 + t * 0.6) * 12;
+                    pos[k * 3 + 1] = y * WAVE_HEIGHT;
+                }
+                geometry.attributes.position.needsUpdate = true;
+
+                // Léger balancement de caméra
+                camera.position.x = Math.sin(t * 0.15) * 60;
+                camera.position.y = 230 + Math.sin(t * 0.25) * 20;
+                camera.lookAt(0, 0, -1500);
+
+                renderer.render(scene, camera);
+            }
+            animate();
+        })();
     </script>
 
 </body>
