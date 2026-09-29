@@ -4,539 +4,407 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MECAPEX - Le Saut Quantique de la Mécanique Pure</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    
+    <!-- Polices Google : Caveat (style manuscrit / marelle) et Orbitron (futuriste) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Three.js for 3D Particle Terrain and Wireframe HUD Widgets -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         * {
             box-sizing: border-box;
-            user-select: none;
-        }
-
-        body {
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
-            background: radial-gradient(circle at 50% 30%, #f4f6fa 0%, #eaedf3 45%, #e0e5ed 100%);
-            color: #2b303c;
-            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-            min-height: 100vh;
         }
 
-        /* 3D Particle Canvas spanning full height */
-        #particle-canvas {
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            font-family: 'Caveat', cursive, sans-serif;
+            color: #ffffff;
+            background-color: #0b0f19;
+        }
+
+        /* --- FOND VIDÉO / IFRAME CLOUDINARY --- */
+        .video-bg-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 0;
-            pointer-events: none;
+            z-index: -2;
+            overflow: hidden;
+            pointer-events: none; /* Empeche toute interaction avec le player */
         }
 
-        /* Crystal White Glassmorphism matching reference image */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(28px) saturate(180%);
-            -webkit-backdrop-filter: blur(28px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.85);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.04),
-                        inset 0 0 30px rgba(255, 255, 255, 0.6);
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        .video-bg-container iframe {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            transform: scale(1.2); /* Léger zoom pour éliminer d'éventuelles bordures noires */
+            object-fit: cover;
         }
 
-        .glass-panel:hover {
-            background: rgba(255, 255, 255, 0.6);
-            border-color: rgba(255, 255, 255, 1);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.07),
-                        inset 0 0 40px rgba(255, 255, 255, 0.8);
-        }
-
-        /* Card Frame Container with breathing animation */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.52);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03),
-                        inset 0 0 20px rgba(255, 255, 255, 0.5);
-        }
-
-        /* High-Frequency Hover Agitation / Trembling Effect */
-        @keyframes frameJitter {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            20% { transform: translate(-1.2px, 0.8px) rotate(-0.1deg); }
-            40% { transform: translate(1.2px, -0.8px) rotate(0.1deg); }
-            60% { transform: translate(-0.8px, -0.8px) rotate(-0.05deg); }
-            80% { transform: translate(0.8px, 0.8px) rotate(0.05deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
-        }
-
-        .hover-agitate {
-            transition: transform 0.2s ease, box-shadow 0.3s ease;
-        }
-
-        .hover-agitate:hover {
-            animation: frameJitter 0.15s ease-in-out infinite alternate;
-        }
-
-        /* Video Background inside Glass Frames */
-        .video-glass-bg {
-            position: absolute;
+        /* Overlay très léger pour contraster le texte tout en gardant le fond très visible */
+        .bg-overlay {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            z-index: 0;
-            opacity: 0.75;
-            transition: all 0.5s ease;
-            filter: contrast(105%) brightness(102%);
+            background: radial-gradient(circle at center, rgba(15, 23, 42, 0.2) 0%, rgba(10, 15, 29, 0.6) 100%);
+            z-index: -1;
+            pointer-events: none;
         }
 
-        .card-frame:hover .video-glass-bg {
-            opacity: 0.92;
-            transform: scale(1.04);
+        /* --- CONTENEUR PRINCIPAL --- */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            padding: 2% 4%;
+            gap: 20px;
+            align-items: stretch;
         }
 
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
+        /* --- STYLE GLASSMORPHISME TRANSPARENT POUR TOUTES LES FRAMES --- */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.08); /* Très transparent */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3),
+                        inset 0 0 15px rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* --- ANIMATION DES FENÊTRES : PLUS DOUCE, PLUS LENTE, PLUS D'AMPLITUDE --- */
+        .floating-window-1 {
+            animation: floatSoft1 10s ease-in-out infinite alternate;
+        }
+
+        .floating-window-2 {
+            animation: floatSoft2 13s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatSoft1 {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-18px) rotate(0.8deg);
+            }
+            100% {
+                transform: translateY(12px) rotate(-0.5deg);
+            }
+        }
+
+        @keyframes floatSoft2 {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(16px) rotate(-0.7deg);
+            }
+            100% {
+                transform: translateY(-14px) rotate(0.6deg);
+            }
+        }
+
+        /* --- BARRE DE NAVIGATION LATÉRALE (MENU) --- */
+        .sidebar-nav {
+            width: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+            gap: 25px;
+            z-index: 10;
+        }
+
+        .brand-logo {
+            font-size: 28px;
+            color: #38bdf8;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+        }
+
+        .nav-link {
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffffff;
+            background: rgba(56, 189, 248, 0.25);
+            border-color: rgba(56, 189, 248, 0.6);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+            transform: scale(1.08);
+        }
+
+        /* --- CONTENU PRINCIPAL --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* EN-TÊTE DU CONTENU PRINCIPAL */
+        .hero-banner {
+            padding: 35px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tag-category {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #38bdf8;
+            margin-bottom: 10px;
             display: inline-block;
-            box-shadow: 0 0 8px currentColor;
         }
 
-        /* Custom Floating HUD Line Visuals */
-        .hud-line-grid {
-            background-image: radial-gradient(rgba(120, 135, 160, 0.12) 1px, transparent 1px);
-            background-size: 16px 16px;
+        .hero-title {
+            font-family: 'Caveat', cursive;
+            font-size: 52px;
+            line-height: 1.1;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+            letter-spacing: 1px;
+        }
+
+        .hero-description {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.85);
+            max-width: 650px;
+            line-height: 1.3;
+        }
+
+        /* GRILLE DE DEUX VOLETS / CARDS SECONDAIRES */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 220px;
+        }
+
+        .info-card:hover {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .card-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .card-img-placeholder {
+            width: 100%;
+            height: 130px;
+            border-radius: 14px;
+            object-fit: cover;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- PANNEAU LATÉRAL DROIT --- */
+        .side-panel {
+            width: 340px;
+            padding: 30px 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-header {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 12px;
+            color: #f0f9ff;
+        }
+
+        .status-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .status-name {
+            font-size: 22px;
+        }
+
+        .status-badge {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .badge-pending {
+            background: rgba(234, 179, 8, 0.2);
+            color: #facc15;
+            border: 1px solid rgba(234, 179, 8, 0.4);
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1024px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar-nav {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                justify-content: center;
+            }
+            .side-panel {
+                width: 100%;
+            }
         }
     </style>
 </head>
-<body class="relative overflow-x-hidden select-none">
+<body>
 
-    <!-- 3D FULL-VIEWPORT PEARL PARTICLE CANVAS -->
-    <canvas id="particle-canvas"></canvas>
+    <!-- FOND VIDÉO DYNAMIQUE (EMBED CLOUDINARY) -->
+    <div class="video-bg-container">
+        <iframe src="https://player.cloudinary.com/embed/?cloud_name=ljye26cz&public_id=istockphoto-1624246625-640_adpp_is&autoplay=true&loop=true&controls=false&muted=true" 
+                allow="autoplay; fullscreen" 
+                title="Fond Sol en Mouvement">
+        </iframe>
+    </div>
 
-    <!-- MAIN INTERFACE CONTAINER -->
-    <div class="relative z-10 min-h-screen p-4 md:p-8 flex flex-col justify-between max-w-[1700px] mx-auto">
-        
-        <!-- MAIN DASHBOARD CONTENT GRID (MATCHING REFERENCE IMAGE LAYOUT) -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 my-auto items-stretch">
+    <!-- OVERLAY TRANSPARENT -->
+    <div class="bg-overlay"></div>
+
+    <!-- APPLICATION DE SURFACE SUR-ÉLEVÉE -->
+    <div class="app-container">
+
+        <!-- BARRE DE NAVIGATION LATÉRALE AVEC LIENS INDÉPENDANTS -->
+        <nav class="sidebar-nav glass-panel floating-window-1">
+            <div class="brand-logo">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <a href="index.html" class="nav-link active" title="Accueil"><i class="fa-solid fa-house"></i></a>
+            <a href="articles.html" class="nav-link" title="Articles"><i class="fa-solid fa-newspaper"></i></a>
+            <a href="projets.html" class="nav-link" title="Projets"><i class="fa-solid fa-cube"></i></a>
+            <a href="stats.html" class="nav-link" title="Statistiques"><i class="fa-solid fa-chart-line"></i></a>
+            <a href="equipe.html" class="nav-link" title="Équipe"><i class="fa-solid fa-user-group"></i></a>
+            <a href="parametres.html" class="nav-link" title="Paramètres"><i class="fa-solid fa-gear"></i></a>
+        </nav>
+
+        <!-- CONTENU CENTRAL PRINCIPAL -->
+        <main class="main-content">
             
-            <!-- LEFT NAVIGATION SIDEBAR -->
-            <nav class="lg:col-span-1 flex lg:flex-col justify-between items-center my-auto">
-                <div class="glass-panel rounded-2xl p-3 flex lg:flex-col items-center justify-center gap-6 w-full max-w-[70px] hover-agitate py-8">
-                    
-                    <!-- Logo Icon (Purple/Cyan gradient matching reference) -->
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-cyan-400 p-[2px] shadow-md mb-2">
-                        <div class="w-full h-full bg-white/80 rounded-[9px] flex items-center justify-center">
-                            <i class="fa-solid fa-shapes text-indigo-600 text-sm"></i>
-                        </div>
-                    </div>
-
-                    <button class="w-10 h-10 rounded-xl bg-white/70 text-indigo-600 shadow-sm flex items-center justify-center border border-white hover:bg-white transition-all">
-                        <i class="fa-solid fa-house text-sm"></i>
-                    </button>
-                    <button class="w-10 h-10 rounded-xl text-slate-500 flex items-center justify-center hover:bg-white/60 hover:text-slate-800 transition-all">
-                        <i class="fa-solid fa-bars-staggered text-sm"></i>
-                    </button>
-                    <button class="w-10 h-10 rounded-xl text-slate-500 flex items-center justify-center hover:bg-white/60 hover:text-slate-800 transition-all">
-                        <i class="fa-solid fa-cube text-sm"></i>
-                    </button>
-                    <button class="w-10 h-10 rounded-xl text-slate-500 flex items-center justify-center hover:bg-white/60 hover:text-slate-800 transition-all">
-                        <i class="fa-solid fa-chart-simple text-sm"></i>
-                    </button>
-                    <button class="w-10 h-10 rounded-xl text-slate-500 flex items-center justify-center hover:bg-white/60 hover:text-slate-800 transition-all">
-                        <i class="fa-solid fa-user text-sm"></i>
-                    </button>
-                    <button class="w-10 h-10 rounded-xl text-slate-500 flex items-center justify-center hover:bg-white/60 hover:text-slate-800 transition-all">
-                        <i class="fa-solid fa-gear text-sm"></i>
-                    </button>
-                </div>
-            </nav>
-
-            <!-- CENTRAL MAIN ARTICLE & MODULES AREA -->
-            <section class="lg:col-span-8 flex flex-col justify-between gap-6">
-                
-                <!-- HERO TRANSPARENT ARTICLE GLASS CONTAINER -->
-                <div class="glass-panel rounded-3xl p-8 md:p-10 relative overflow-hidden hover-agitate min-h-[340px] flex flex-col justify-between">
-                    
-                    <div class="flex flex-wrap justify-between items-start gap-4">
-                        <div>
-                            <span class="text-teal-600 font-semibold text-xs tracking-widest uppercase mb-1 block">ARTICLE</span>
-                            <h1 class="font-extrabold text-2xl md:text-4xl text-slate-800 tracking-tight leading-tight max-w-xl">
-                                LE SAUT QUANTIQUE<br>DE LA MÉCANIQUE PURE
-                            </h1>
-                            <p class="text-slate-600 text-xs md:text-sm mt-3 font-normal max-w-md leading-relaxed">
-                                Micro-assembly robot using magnetic technology levitation.
-                            </p>
-                        </div>
-
-                        <!-- Pill Badge Highlights -->
-                        <div class="flex flex-col gap-2 items-end">
-                            <span class="bg-white/80 border border-white/90 text-slate-700 text-xs px-4 py-2 rounded-full font-semibold shadow-sm">
-                                ENGRENAGES & MOBILITÉ
-                            </span>
-                            <span class="text-xs font-semibold text-slate-500 mr-2">AÉRO</span>
-                        </div>
-                    </div>
-
-                    <!-- Center 3D Interactive Mechanical Gears Animation -->
-                    <div class="my-4 relative flex justify-center items-center h-44">
-                        <canvas id="hero-gears-canvas" class="w-full h-full max-w-md"></canvas>
-                    </div>
-
-                    <!-- Bottom HUD Status details -->
-                    <div class="flex justify-between items-center text-[11px] text-slate-500 font-medium pt-2 border-t border-slate-300/40">
-                        <span>MECAPEX RECHERCHE QUANTIQUE</span>
-                        <span class="text-emerald-600 font-semibold flex items-center gap-1.5">
-                            <span class="status-dot bg-emerald-500"></span>SYSTÈME OPTIMAL
-                        </span>
-                    </div>
-                </div>
-
-                <!-- BOTTOM 3 CARDS ROW -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    
-                    <!-- Card 1: Vehicules de Concept -->
-                    <div class="glass-card card-frame rounded-2xl overflow-hidden relative h-64 flex flex-col justify-between p-5 group cursor-pointer hover-agitate">
-                        <video class="video-glass-bg" autoplay loop muted playsinline>
-                            <source src="https://assets.mixkit.co/videos/preview/mixkit-futuristic-technology-loop-3d-render-41553-large.mp4" type="video/mp4">
-                        </video>
-                        <div class="relative z-10">
-                            <span class="text-[10px] font-bold text-slate-600 tracking-wider uppercase bg-white/80 px-2.5 py-1 rounded-md">CONCEPT</span>
-                        </div>
-                        <div class="relative z-10 bg-white/70 backdrop-blur-md p-3.5 rounded-xl border border-white/80">
-                            <h3 class="font-bold text-xs text-slate-900 uppercase leading-snug">
-                                VÉHICULES DE CONCEPT SANS CARÉNAGE ET À TURBINE
-                            </h3>
-                        </div>
-                    </div>
-
-                    <!-- Card 2: Turbines Dynamiques -->
-                    <div class="glass-card card-frame rounded-2xl overflow-hidden relative h-64 flex flex-col justify-between p-5 group cursor-pointer hover-agitate">
-                        <video class="video-glass-bg" autoplay loop muted playsinline>
-                            <source src="https://assets.mixkit.co/videos/preview/mixkit-motherboard-and-microchips-close-up-41539-large.mp4" type="video/mp4">
-                        </video>
-                        <div class="relative z-10">
-                            <span class="text-[10px] font-bold text-slate-600 tracking-wider uppercase bg-white/80 px-2.5 py-1 rounded-md">PROPULSION</span>
-                        </div>
-                        <div class="relative z-10 bg-white/70 backdrop-blur-md p-3.5 rounded-xl border border-white/80">
-                            <h3 class="font-bold text-xs text-slate-900 uppercase leading-snug">
-                                TURBINES DYNAMIQUES À ÉTATS GAZEUX
-                            </h3>
-                        </div>
-                    </div>
-
-                    <!-- Card 3: Nano-Robots Araignées -->
-                    <div class="glass-card card-frame rounded-2xl overflow-hidden relative h-64 flex flex-col justify-between p-5 group cursor-pointer hover-agitate">
-                        <video class="video-glass-bg" autoplay loop muted playsinline>
-                            <source src="https://assets.mixkit.co/videos/preview/mixkit-circuit-board-microchip-components-and-lights-41538-large.mp4" type="video/mp4">
-                        </video>
-                        <div class="relative z-10">
-                            <span class="text-[10px] font-bold text-slate-600 tracking-wider uppercase bg-white/80 px-2.5 py-1 rounded-md">ROBOTIQUE</span>
-                        </div>
-                        <div class="relative z-10 bg-white/70 backdrop-blur-md p-3.5 rounded-xl border border-white/80">
-                            <h3 class="font-bold text-xs text-slate-900 uppercase leading-snug">
-                                ESSAIMS DE NANO-ROBOTS ARAIGNÉES
-                            </h3>
-                        </div>
-                    </div>
-
-                </div>
-
+            <!-- CADRE HEADER PRINCIPAL -->
+            <section class="hero-banner glass-panel floating-window-1">
+                <span class="tag-category">ARTICLE EXCLUSIF</span>
+                <h1 class="hero-title">LE SAUT QUANTIQUE<br>DE LA MÉCANIQUE PURE</h1>
+                <p class="hero-description">
+                    Micro-assemblage robotisé exploitant une lévitation magnétique haute fréquence et une cinématique de nouvelle génération.
+                </p>
             </section>
 
-            <!-- RIGHT PANEL: PROTOTYPES EN DÉVELOPPEMENT -->
-            <aside class="lg:col-span-3 flex flex-col justify-between gap-5 my-auto">
-                <div class="glass-panel rounded-3xl p-6 hover-agitate flex flex-col justify-between min-h-[580px]">
+            <!-- GRILLE DE DEUX CADRES SECONDAIRES -->
+            <div class="cards-grid">
+                
+                <article class="info-card glass-panel floating-window-2">
                     <div>
-                        <h3 class="font-bold text-sm text-slate-800 uppercase tracking-wider mb-6 pb-3 border-b border-slate-300/50">
-                            PROTOTYPES EN DÉVELOPPEMENT
-                        </h3>
-
-                        <div class="space-y-4">
-                            <!-- Prototype 1 -->
-                            <div class="p-4 rounded-xl bg-white/40 border border-white/80 hover:bg-white/60 transition-all">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-bold text-xs text-slate-800">PROTOTYPE 1</span>
-                                    <span class="text-teal-600 text-[11px] font-semibold flex items-center gap-1">
-                                        <span class="status-dot bg-teal-500"></span>STATUS
-                                    </span>
-                                </div>
-                                <p class="text-[10px] font-medium text-slate-500 mt-1 uppercase">EN DÉVELOPPEMENT</p>
-                            </div>
-
-                            <!-- Prototype 2 -->
-                            <div class="p-4 rounded-xl bg-white/40 border border-white/80 hover:bg-white/60 transition-all">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-bold text-xs text-slate-800">PROTOTYPE 2</span>
-                                    <span class="text-teal-600 text-[11px] font-semibold flex items-center gap-1">
-                                        <span class="status-dot bg-teal-500"></span>STATUS
-                                    </span>
-                                </div>
-                                <p class="text-[10px] font-medium text-slate-500 mt-1 uppercase">EN DÉVELOPPEMENT</p>
-                            </div>
-
-                            <!-- Prototype 3 -->
-                            <div class="p-4 rounded-xl bg-white/40 border border-white/80 hover:bg-white/60 transition-all">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-bold text-xs text-slate-800">PROTOTYPE 3</span>
-                                    <span class="text-amber-600 text-[11px] font-semibold flex items-center gap-1">
-                                        <span class="status-dot bg-amber-500"></span>STATUS
-                                    </span>
-                                </div>
-                                <p class="text-[10px] font-medium text-slate-500 mt-1 uppercase">EN DÉVELOPPEMENT</p>
-                            </div>
-
-                            <!-- Prototype 4 -->
-                            <div class="p-4 rounded-xl bg-white/40 border border-white/80 hover:bg-white/60 transition-all">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-bold text-xs text-slate-800">PROTOTYPE 4</span>
-                                    <span class="text-purple-600 text-[11px] font-semibold flex items-center gap-1">
-                                        <span class="status-dot bg-purple-500"></span>STATUS
-                                    </span>
-                                </div>
-                                <p class="text-[10px] font-medium text-slate-500 mt-1 uppercase">EN DÉVELOPPEMENT</p>
-                            </div>
-                        </div>
+                        <span class="tag-category">MOBILITÉ</span>
+                        <h2 class="card-title">VÉHICULES DE CONCEPT SANS CARÉNAGE</h2>
+                        <p style="font-size: 20px; color: rgba(255,255,255,0.8);">Prototypage rapide à turbine intégrée.</p>
                     </div>
+                    <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80" alt="Concept Vehicle" class="card-img-placeholder">
+                </article>
 
-                    <!-- Right Panel HUD Wireframe Canvas Widget -->
-                    <div class="mt-6 pt-4 border-t border-slate-300/50">
-                        <div class="text-[11px] font-bold text-slate-600 mb-2 uppercase">GÉOMÉTRIE TORIQUE 3D</div>
-                        <div class="w-full h-32 bg-white/30 rounded-2xl border border-white/80 overflow-hidden">
-                            <canvas id="right-wireframe-canvas" class="w-full h-full"></canvas>
-                        </div>
+                <article class="info-card glass-panel floating-window-1">
+                    <div>
+                        <span class="tag-category">PROPULSION</span>
+                        <h2 class="card-title">TURBINES DYNAMIQUES À ÉTATS GAZEUX</h2>
+                        <p style="font-size: 20px; color: rgba(255,255,255,0.8);">Flux thermiques optimisés par IA.</p>
                     </div>
+                    <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="Turbine" class="card-img-placeholder">
+                </article>
 
-                </div>
-            </aside>
-
-        </div>
-
-        <!-- SURROUNDING HUD WIREFRAME GRAPHIC WIDGETS (MATCHING REFERENCE IMAGE) -->
-        <div class="hidden xl:block pointer-events-none">
-            <!-- Top Left Line Graph Overlay -->
-            <div class="fixed top-8 left-8 w-44 h-28 glass-panel rounded-2xl p-3 border border-white/80">
-                <div class="text-[9px] font-bold text-slate-500 mb-1">GRAPH // RENDEMENT</div>
-                <svg class="w-full h-16 stroke-teal-500 fill-none" viewBox="0 0 100 40">
-                    <path d="M0,35 Q20,10 40,25 T80,15 T100,5" stroke-width="2"/>
-                </svg>
             </div>
 
-            <!-- Bottom Left Mesh Net Overlay -->
-            <div class="fixed bottom-8 left-8 w-44 h-28 glass-panel rounded-2xl p-3 border border-white/80">
-                <div class="text-[9px] font-bold text-slate-500 mb-1">METH // TOPOLOGIE</div>
-                <div class="w-full h-16 hud-line-grid border border-slate-300/50 rounded-lg"></div>
-            </div>
+        </main>
 
-            <!-- Top Right Wireframe Sphere -->
-            <div class="fixed top-8 right-8 w-44 h-32 glass-panel rounded-2xl p-2 border border-white/80 flex items-center justify-center">
-                <canvas id="top-right-sphere-canvas" class="w-full h-full"></canvas>
-            </div>
-
-            <!-- Bottom Right Field Magnetics -->
-            <div class="fixed bottom-8 right-8 w-44 h-32 glass-panel rounded-2xl p-2 border border-white/80 flex items-center justify-center">
-                <canvas id="bottom-right-field-canvas" class="w-full h-full"></canvas>
-            </div>
-        </div>
+        <!-- PANNEAU LATÉRAL DROIT (PROTOTYPES ET STATUS) -->
+        <aside class="side-panel glass-panel floating-window-2">
+            <h2 class="panel-header">Prototypes en Développement</h2>
+            
+            <ul class="status-list">
+                <li class="status-item">
+                    <span class="status-name">PROTOTYPE 1</span>
+                    <span class="status-badge badge-active">OPÉRATIONNEL</span>
+                </li>
+                <li class="status-item">
+                    <span class="status-name">PROTOTYPE 2</span>
+                    <span class="status-badge badge-active">EN TEST</span>
+                </li>
+                <li class="status-item">
+                    <span class="status-name">PROTOTYPE 3</span>
+                    <span class="status-badge badge-pending">EN ATTENTE</span>
+                </li>
+                <li class="status-item">
+                    <span class="status-name">PROTOTYPE 4</span>
+                    <span class="status-badge badge-pending">CONCEPTION</span>
+                </li>
+            </ul>
+        </aside>
 
     </div>
 
-    <script>
-        /* =========================================================
-           1. FULL-VIEWPORT PEARL PARTICLE TERRAIN (ZERO BLUE)
-           ========================================================= */
-        let scene, camera, renderer, particleGeometry, particleSystem;
-        const gridX = 400;
-        const gridZ = 400;
-        const totalParticles = gridX * gridZ;
-
-        function initPearlParticleSystem() {
-            const canvas = document.getElementById('particle-canvas');
-            scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0xeaedf3, 0.008);
-
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, -1, 18);
-            camera.rotation.x = 0.28;
-
-            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-            particleGeometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(totalParticles * 3);
-            const colors = new Float32Array(totalParticles * 3);
-
-            let i = 0;
-            const sepX = 0.11;
-            const sepZ = 0.11;
-            const startX = -(gridX * sepX) / 2;
-            const startZ = -(gridZ * sepZ) / 2;
-
-            for (let x = 0; x < gridX; x++) {
-                for (let z = 0; z < gridZ; z++) {
-                    positions[i * 3] = startX + x * sepX;
-                    positions[i * 3 + 1] = (z / gridZ) * 16 - 7;
-                    positions[i * 3 + 2] = startZ + z * sepZ;
-
-                    // Soft glowing white/pearl particles with zero blue tint
-                    colors[i * 3] = 0.88;     // Red
-                    colors[i * 3 + 1] = 0.90; // Green
-                    colors[i * 3 + 2] = 0.92; // Blue
-
-                    i++;
-                }
-            }
-
-            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-            const particleMaterial = new THREE.PointsMaterial({
-                size: 0.035,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.75,
-                blending: THREE.NormalBlending
-            });
-
-            particleSystem = new THREE.Points(particleGeometry, particleMaterial);
-            scene.add(particleSystem);
-
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-        }
-
-        /* =========================================================
-           2. HERO SECTION 3D GEARS MECHANISM WIDGET
-           ========================================================= */
-        let heroScene, heroCamera, heroRenderer, heroGearGroup;
-
-        function initHeroGears() {
-            const canvas = document.getElementById('hero-gears-canvas');
-            heroScene = new THREE.Scene();
-
-            heroCamera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
-            heroCamera.position.z = 4.5;
-
-            heroRenderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-            heroRenderer.setSize(canvas.clientWidth, canvas.clientHeight);
-
-            heroGearGroup = new THREE.Group();
-
-            const mat1 = new THREE.MeshBasicMaterial({ color: 0x0d9488, wireframe: true });
-            const mat2 = new THREE.MeshBasicMaterial({ color: 0x9333ea, wireframe: true });
-
-            const gear1 = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.25, 16, 60), mat1);
-            const gear2 = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.18, 16, 40), mat2);
-            gear2.position.set(0.6, 0.3, 0.2);
-
-            heroGearGroup.add(gear1);
-            heroGearGroup.add(gear2);
-            heroScene.add(heroGearGroup);
-        }
-
-        /* =========================================================
-           3. FLOATING WIREFRAME HUD WIDGETS
-           ========================================================= */
-        let rightScene, rightCamera, rightRenderer, rightTorus;
-        let sphereScene, sphereCamera, sphereRenderer, sphereMesh;
-
-        function initHudWidgets() {
-            // Right Panel Wireframe Torus
-            const canvasR = document.getElementById('right-wireframe-canvas');
-            if (canvasR) {
-                rightScene = new THREE.Scene();
-                rightCamera = new THREE.PerspectiveCamera(50, canvasR.clientWidth / canvasR.clientHeight, 0.1, 100);
-                rightCamera.position.z = 3.2;
-
-                rightRenderer = new THREE.WebGLRenderer({ canvas: canvasR, alpha: true, antialias: true });
-                rightRenderer.setSize(canvasR.clientWidth, canvasR.clientHeight);
-
-                const geoR = new THREE.TorusKnotGeometry(0.9, 0.22, 64, 16);
-                const matR = new THREE.MeshBasicMaterial({ color: 0x475569, wireframe: true });
-                rightTorus = new THREE.Mesh(geoR, matR);
-                rightScene.add(rightTorus);
-            }
-
-            // Top Right Wireframe Sphere
-            const canvasS = document.getElementById('top-right-sphere-canvas');
-            if (canvasS) {
-                sphereScene = new THREE.Scene();
-                sphereCamera = new THREE.PerspectiveCamera(50, canvasS.clientWidth / canvasS.clientHeight, 0.1, 100);
-                sphereCamera.position.z = 3;
-
-                sphereRenderer = new THREE.WebGLRenderer({ canvas: canvasS, alpha: true, antialias: true });
-                sphereRenderer.setSize(canvasS.clientWidth, canvasS.clientHeight);
-
-                const geoS = new THREE.SphereGeometry(1.1, 16, 16);
-                const matS = new THREE.MeshBasicMaterial({ color: 0x0d9488, wireframe: true });
-                sphereMesh = new THREE.Mesh(geoS, matS);
-                sphereScene.add(sphereMesh);
-            }
-        }
-
-        /* =========================================================
-           4. ANIMATION LOOP & SMOOTH RELIEF MOTION
-           ========================================================= */
-        let clock = new THREE.Clock();
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const t = clock.getElapsedTime();
-
-            // Undulating particle relief wave motion
-            const pos = particleGeometry.attributes.position.array;
-            let idx = 0;
-            for (let x = 0; x < gridX; x += 2) {
-                for (let z = 0; z < gridZ; z += 2) {
-                    pos[idx * 3 + 1] = (z / gridZ) * 16 - 7 + Math.sin(x * 0.04 + t * 0.6) * 0.35 + Math.cos(z * 0.04 + t * 0.5) * 0.2;
-                    idx += 2;
-                }
-            }
-            particleGeometry.attributes.position.needsUpdate = true;
-            renderer.render(scene, camera);
-
-            // Animate 3D HUD widgets
-            if (heroGearGroup) {
-                heroGearGroup.rotation.x = t * 0.2;
-                heroGearGroup.rotation.y = t * 0.3;
-                heroRenderer.render(heroScene, heroCamera);
-            }
-
-            if (rightTorus) {
-                rightTorus.rotation.y = t * 0.35;
-                rightRenderer.render(rightScene, rightCamera);
-            }
-
-            if (sphereMesh) {
-                sphereMesh.rotation.x = t * 0.25;
-                sphereMesh.rotation.y = t * 0.25;
-                sphereRenderer.render(sphereScene, sphereCamera);
-            }
-        }
-
-        window.onload = function() {
-            initPearlParticleSystem();
-            initHeroGears();
-            initHudWidgets();
-            animate();
-        };
-    </script>
 </body>
 </html>
