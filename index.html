@@ -5,13 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MECAPEX - Le Saut Quantique de la Mécanique Pure</title>
     
+    <!-- Polices ISO 3098 / osifont (Normalisation technique ISO 3098) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
     <!-- FontAwesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* Importation et imposition globale de la police EN ISO 3098 (osifont) */
+        /* Importation directe de la police ISO 3098 (osifont) */
         @font-face {
-            font-family: 'EN ISO 3098';
+            font-family: 'ISO 3098';
             src: url('https://cdn.jsdelivr.net/gh/openscad/osifont@master/osifont.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
@@ -21,20 +26,20 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'EN ISO 3098', monospace, sans-serif !important;
         }
 
         body, html {
             width: 100%;
             height: 100%;
             overflow-x: hidden;
+            font-family: 'ISO 3098', 'Share Tech Mono', monospace, sans-serif;
             color: #ffffff;
             background-color: #0b0f19;
             font-size: 14px;
             line-height: 1.4;
         }
 
-        /* --- CONTENEUR ARRIÈRE-PLAN VIDÉO THÉÂTRAL --- */
+        /* --- FOND VIDÉO IFRAME CLOUDINARY (EFFET THÉÂTRAL) --- */
         .video-bg-container {
             position: fixed;
             top: 0;
@@ -47,40 +52,26 @@
             background: #000;
         }
 
-        /* Video HTML5 directe (Lancement instantané et fluide) */
-        .video-bg-container video {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            transform: translate(-50%, -50%) scale(1.1);
-            object-fit: cover;
-        }
-
-        /* Fallback / Iframe Cloudinary configurée avec autorisations */
         .video-bg-container iframe {
             position: absolute;
             top: 50%;
             left: 50%;
             width: 100vw;
-            height: 56.25vw;
+            height: 56.25vw; /* Ratio 16:9 */
             min-height: 100vh;
-            min-width: 177.77vh;
+            min-width: 177.77vh; /* Ratio 16:9 */
             transform: translate(-50%, -50%) scale(1.15);
             border: none;
         }
 
-        /* Overlay théâtral (vignettage sombre pour faire ressortir le texte) */
+        /* Overlay théâtral (vignettage sombre autour des bords) */
         .bg-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, rgba(11, 15, 25, 0.25) 20%, rgba(5, 8, 15, 0.75) 80%, rgba(0, 0, 0, 0.95) 100%);
+            background: radial-gradient(circle at center, rgba(11, 15, 25, 0.2) 20%, rgba(5, 8, 15, 0.75) 80%, rgba(0, 0, 0, 0.95) 100%);
             z-index: -1;
             pointer-events: none;
         }
@@ -94,7 +85,7 @@
             align-items: stretch;
         }
 
-        /* --- STYLE GLASSMORPHISME TRANSPARENT --- */
+        /* --- STYLE GLASSMORPHISME TRANSPARENT POUR TOUTES LES FRAMES --- */
         .glass-panel {
             background: rgba(15, 23, 42, 0.25);
             backdrop-filter: blur(10px);
@@ -194,8 +185,15 @@
             gap: 20px;
         }
 
-        /* HARMONISATION DES TAILLES DE TEXTES EN ISO 3098 */
+        /* EN-TÊTE DU CONTENU PRINCIPAL */
+        .hero-banner {
+            padding: 25px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
         .tag-category {
+            font-family: 'ISO 3098', monospace;
             font-size: 12px;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -204,11 +202,8 @@
             display: inline-block;
         }
 
-        .hero-banner {
-            padding: 25px 30px;
-        }
-
         .hero-title {
+            font-family: 'ISO 3098', monospace;
             font-size: 22px;
             line-height: 1.3;
             font-weight: normal;
@@ -219,13 +214,14 @@
         }
 
         .hero-description {
+            font-family: 'ISO 3098', monospace;
             font-size: 14px;
             color: rgba(255, 255, 255, 0.85);
             max-width: 650px;
             line-height: 1.4;
         }
 
-        /* GRILLE DE CARDS SECONDAIRES */
+        /* GRILLE DE DEUX VOLETS / CARDS SECONDAIRES */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -241,6 +237,7 @@
         }
 
         .card-title {
+            font-family: 'ISO 3098', monospace;
             font-size: 16px;
             font-weight: normal;
             margin-bottom: 8px;
@@ -249,6 +246,7 @@
         }
 
         .card-desc {
+            font-family: 'ISO 3098', monospace;
             font-size: 13px;
             color: rgba(255, 255, 255, 0.75);
         }
@@ -273,6 +271,7 @@
         }
 
         .panel-header {
+            font-family: 'ISO 3098', monospace;
             font-size: 14px;
             font-weight: normal;
             letter-spacing: 1px;
@@ -300,11 +299,13 @@
         }
 
         .status-name {
+            font-family: 'ISO 3098', monospace;
             font-size: 13px;
             text-transform: uppercase;
         }
 
         .status-badge {
+            font-family: 'ISO 3098', monospace;
             font-size: 11px;
             padding: 3px 8px;
             border-radius: 12px;
@@ -342,16 +343,12 @@
 </head>
 <body>
 
-    <!-- FOND VIDÉO THÉÂTRAL (FLUX DIRECT MP4 CLOUDINARY + FALLBACK IFRAME) -->
+    <!-- FOND VIDÉO DYNAMIQUE (IFRAME CLOUDINARY AVEC INTEGRATION THÉÂTRALE) -->
     <div class="video-bg-container">
-        <video autoplay loop muted playsinline poster="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80">
-            <source src="https://res.cloudinary.com/ljye26cz/video/upload/istockphoto-1624246625-640_adpp_is.mp4" type="video/mp4">
-            <!-- Fallback Iframe avec politique d'autorisation autoplay -->
-            <iframe src="https://player.cloudinary.com/embed/?cloud_name=ljye26cz&public_id=istockphoto-1624246625-640_adpp_is&player%5Bautoplay%5D=true&player%5Bmuted%5D=true&player%5Bloop%5D=true" 
-                    allow="autoplay; fullscreen; encrypted-media" 
-                    title="Fond Vidéo">
-            </iframe>
-        </video>
+        <iframe src="https://player.cloudinary.com/embed/?cloud_name=ljye26cz&public_id=istockphoto-1624246625-640_adpp_is&autoplay=true&loop=true&controls=false&muted=true" 
+                allow="autoplay; fullscreen" 
+                title="Fond Sol en Mouvement">
+        </iframe>
     </div>
 
     <!-- OVERLAY TRANSPARENT THÉÂTRAL -->
@@ -360,7 +357,7 @@
     <!-- APPLICATION DE SURFACE SUR-ÉLEVÉE -->
     <div class="app-container">
 
-        <!-- BARRE DE NAVIGATION LATÉRALE -->
+        <!-- BARRE DE NAVIGATION LATÉRALE AVEC LIENS INDÉPENDANTS -->
         <nav class="sidebar-nav glass-panel floating-window-1">
             <div class="brand-logo">
                 <i class="fa-solid fa-bolt"></i>
@@ -410,7 +407,7 @@
 
         </main>
 
-        <!-- PANNEAU LATÉRAL DROIT -->
+        <!-- PANNEAU LATÉRAL DROIT (PROTOTYPES ET STATUS) -->
         <aside class="side-panel glass-panel floating-window-2">
             <h2 class="panel-header">Prototypes en Développement</h2>
             
