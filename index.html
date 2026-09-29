@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MECAPEX - Le Saut Quantique de la Mécanique Pure</title>
     
-    <!-- Polices Google : Marelle (style manuscrit / marelle) et Orbitron (futuriste) -->
+    <!-- Polices Google : Caveat (style manuscrit / marelle) et Rajdhani -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Marelle:wght@500;700&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     
     <!-- FontAwesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,12 +24,12 @@
             width: 100%;
             height: 100%;
             overflow-x: hidden;
-            font-family: 'Marelle', cursive, sans-serif;
+            font-family: 'Caveat', cursive, sans-serif;
             color: #ffffff;
             background-color: #0b0f19;
         }
 
-        /* --- FOND VIDÉO / IFRAME CLOUDINARY --- */
+        /* --- FOND VIDÉO DIRECT MP4 (CORRECTEMENT VISIBLE) --- */
         .video-bg-container {
             position: fixed;
             top: 0;
@@ -38,15 +38,16 @@
             height: 100vh;
             z-index: -2;
             overflow: hidden;
-            pointer-events: none; /* Empeche toute interaction avec le player */
+            pointer-events: none;
         }
 
-        .video-bg-container iframe {
+        .video-bg-container video {
             width: 100vw;
             height: 100vh;
-            border: none;
-            transform: scale(1.2); /* Léger zoom pour éliminer d'éventuelles bordures noires */
             object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         /* Overlay très léger pour contraster le texte tout en gardant le fond très visible */
@@ -56,7 +57,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, rgba(15, 23, 42, 0.2) 0%, rgba(10, 15, 29, 0.6) 100%);
+            background: radial-gradient(circle at center, rgba(15, 23, 42, 0.15) 0%, rgba(10, 15, 29, 0.5) 100%);
             z-index: -1;
             pointer-events: none;
         }
@@ -79,10 +80,29 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3),
                         inset 0 0 15px rgba(255, 255, 255, 0.05);
             border-radius: 24px;
-            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        /* --- ANIMATION DES FENÊTRES : PLUS DOUCE, PLUS LENTE, PLUS D'AMPLITUDE --- */
+        /* --- ANIMATION D'AGITATION (SHAKE) AU SURVOL DES CADRES --- */
+        .glass-panel:hover {
+            animation: shakeCard 0.5s ease-in-out !important;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(56, 189, 248, 0.6);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4),
+                        0 0 20px rgba(56, 189, 248, 0.3);
+        }
+
+        @keyframes shakeCard {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            15% { transform: translate(-6px, -2px) rotate(-1.5deg); }
+            30% { transform: translate(5px, 2px) rotate(1.5deg); }
+            45% { transform: translate(-4px, 1px) rotate(-1deg); }
+            60% { transform: translate(3px, -1px) rotate(1deg); }
+            75% { transform: translate(-1px, 1px) rotate(-0.5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        /* --- ANIMATION DES FENÊTRES : FLOTTAISON DOUCE ET LENTE --- */
         .floating-window-1 {
             animation: floatSoft1 10s ease-in-out infinite alternate;
         }
@@ -173,7 +193,7 @@
 
         .tag-category {
             font-family: 'Rajdhani', sans-serif;
-            font-size: 12px;
+            font-size: 14px;
             letter-spacing: 3px;
             text-transform: uppercase;
             color: #38bdf8;
@@ -182,8 +202,8 @@
         }
 
         .hero-title {
-            font-family: 'Marelle', cursive;
-            font-size: 28px;
+            font-family: 'Caveat', cursive;
+            font-size: 38px;
             line-height: 1.1;
             font-weight: 700;
             margin-bottom: 15px;
@@ -213,13 +233,8 @@
             min-height: 220px;
         }
 
-        .info-card:hover {
-            background: rgba(255, 255, 255, 0.14);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
         .card-title {
-            font-size: 32px;
+            font-size: 30px;
             font-weight: 700;
             margin-bottom: 10px;
             line-height: 1.1;
@@ -246,7 +261,7 @@
 
         .panel-header {
             font-family: 'Rajdhani', sans-serif;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -278,7 +293,7 @@
 
         .status-badge {
             font-family: 'Rajdhani', sans-serif;
-            font-size: 10px;
+            font-size: 11px;
             padding: 4px 10px;
             border-radius: 20px;
             text-transform: uppercase;
@@ -316,12 +331,13 @@
 </head>
 <body>
 
-    <!-- FOND VIDÉO DYNAMIQUE (EMBED CLOUDINARY) -->
+    <!-- FOND VIDÉO DYNAMIQUE (FLUX MP4 DIRECT CLOUDINARY) -->
     <div class="video-bg-container">
-        <iframe src="https://player.cloudinary.com/embed/?cloud_name=ljye26cz&public_id=istockphoto-1624246625-640_adpp_is&autoplay=true&loop=true&controls=false&muted=true" 
-                allow="autoplay; fullscreen" 
-                title="Fond Sol en Mouvement">
-        </iframe>
+        <video autoplay muted loop playsinline id="bg-video">
+            <source src="https://res.cloudinary.com/ljye26cz/video/upload/istockphoto-1624246625-640_adpp_is.mp4" type="video/mp4">
+            <!-- Alternative Iframe au cas où la vidéo brute est bloquée -->
+            <iframe src="https://player.cloudinary.com/embed/?cloud_name=ljye26cz&public_id=istockphoto-1624246625-640_adpp_is&autoplay=true&loop=true&controls=false&muted=true" style="width:100%;height:100%;border:none;"></iframe>
+        </video>
     </div>
 
     <!-- OVERLAY TRANSPARENT -->
@@ -371,7 +387,7 @@
                     <div>
                         <span class="tag-category">PROPULSION</span>
                         <h2 class="card-title">Turbines dynamiques à états gazeux</h2>
-                        <p style="font-size: 20px; color: rgba(255,255,255,0.8);">Flux thermiques optimisés par ia.</p>
+                        <p style="font-size: 20px; color: rgba(255,255,255,0.8);">Flux thermiques optimisés par IA.</p>
                     </div>
                     <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="Turbine" class="card-img-placeholder">
                 </article>
