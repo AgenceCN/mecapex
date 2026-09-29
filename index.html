@@ -4,17 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MECAPEX - Le Saut Quantique de la Mécanique Pure</title>
-    
-    <!-- Polices ISO 3098 / osifont (Normalisation technique ISO 3098) -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
-    <!-- FontAwesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* Importation directe de la police ISO 3098 (osifont) */
         @font-face {
             font-family: 'ISO 3098';
             src: url('https://cdn.jsdelivr.net/gh/openscad/osifont@master/osifont.ttf') format('truetype');
@@ -28,56 +24,60 @@
             padding: 0;
         }
 
-        body, html {
+        /* Le fond sombre est sur html uniquement : body reste transparent
+           pour ne pas recouvrir la vidéo */
+        html {
             width: 100%;
-            height: 100%;
+            min-height: 100%;
+            background-color: #0b0f19;
+        }
+
+        body {
+            width: 100%;
+            min-height: 100vh;
             overflow-x: hidden;
             font-family: 'ISO 3098', 'Share Tech Mono', monospace, sans-serif;
             color: #ffffff;
-            background-color: #0b0f19;
+            background: transparent;
             font-size: 14px;
             line-height: 1.4;
         }
 
-        /* --- FOND VIDÉO IFRAME CLOUDINARY (EFFET THÉÂTRAL) --- */
+        /* --- VIDÉO DE FOND --- */
         .video-bg-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            inset: 0;
             z-index: -2;
             overflow: hidden;
             pointer-events: none;
-            background: #000;
+            background: #05080f;
         }
 
-        .video-bg-container iframe {
+        .video-bg-container video {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 100vw;
-            height: 56.25vw; /* Ratio 16:9 */
-            min-height: 100vh;
-            min-width: 177.77vh; /* Ratio 16:9 */
-            transform: translate(-50%, -50%) scale(1.15);
-            border: none;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
         }
 
-        /* Overlay théâtral (vignettage sombre autour des bords) */
+        /* Vignettage sombre */
         .bg-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, rgba(11, 15, 25, 0.2) 20%, rgba(5, 8, 15, 0.75) 80%, rgba(0, 0, 0, 0.95) 100%);
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(11, 15, 25, 0.15) 20%, rgba(5, 8, 15, 0.7) 80%, rgba(0, 0, 0, 0.92) 100%);
             z-index: -1;
             pointer-events: none;
         }
 
         /* --- CONTENEUR PRINCIPAL --- */
         .app-container {
+            position: relative;
+            z-index: 1;
             display: flex;
             min-height: 100vh;
             padding: 2% 4%;
@@ -85,7 +85,7 @@
             align-items: stretch;
         }
 
-        /* --- STYLE GLASSMORPHISME TRANSPARENT POUR TOUTES LES FRAMES --- */
+        /* --- GLASSMORPHISME --- */
         .glass-panel {
             background: rgba(15, 23, 42, 0.25);
             backdrop-filter: blur(10px);
@@ -94,10 +94,9 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4),
                         inset 0 0 10px rgba(255, 255, 255, 0.05);
             border-radius: 16px;
-            transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
-        /* --- ANIMATION D'AGITATION AU SURVOL DES CADRES --- */
         .glass-panel:hover {
             animation: shake 0.4s ease-in-out infinite alternate;
             background: rgba(255, 255, 255, 0.12);
@@ -105,39 +104,35 @@
         }
 
         @keyframes shake {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(-2px, 1px) rotate(-0.5deg); }
-            50% { transform: translate(2px, -1px) rotate(0.5deg); }
-            75% { transform: translate(-1px, -1px) rotate(-0.3deg); }
+            0%   { transform: translate(0, 0) rotate(0deg); }
+            25%  { transform: translate(-2px, 1px) rotate(-0.5deg); }
+            50%  { transform: translate(2px, -1px) rotate(0.5deg); }
+            75%  { transform: translate(-1px, -1px) rotate(-0.3deg); }
             100% { transform: translate(1px, 1px) rotate(0.3deg); }
         }
 
-        /* --- ANIMATIONS DE FLOTTAISON DE BASE --- */
-        .floating-window-1 {
-            animation: floatSoft1 10s ease-in-out infinite alternate;
-        }
+        /* --- FLOTTAISON --- */
+        .floating-window-1 { animation: floatSoft1 10s ease-in-out infinite alternate; }
+        .floating-window-2 { animation: floatSoft2 13s ease-in-out infinite alternate; }
 
-        .floating-window-2 {
-            animation: floatSoft2 13s ease-in-out infinite alternate;
-        }
-
-        .floating-window-1:hover, .floating-window-2:hover {
+        .floating-window-1:hover,
+        .floating-window-2:hover {
             animation: shake 0.4s ease-in-out infinite alternate;
         }
 
         @keyframes floatSoft1 {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-14px); }
+            0%   { transform: translateY(0); }
+            50%  { transform: translateY(-14px); }
             100% { transform: translateY(10px); }
         }
 
         @keyframes floatSoft2 {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(14px); }
+            0%   { transform: translateY(0); }
+            50%  { transform: translateY(14px); }
             100% { transform: translateY(-10px); }
         }
 
-        /* --- BARRE DE NAVIGATION LATÉRALE (MENU) --- */
+        /* --- MENU LATÉRAL --- */
         .sidebar-nav {
             width: 65px;
             display: flex;
@@ -185,7 +180,6 @@
             gap: 20px;
         }
 
-        /* EN-TÊTE DU CONTENU PRINCIPAL */
         .hero-banner {
             padding: 25px 30px;
             position: relative;
@@ -193,7 +187,6 @@
         }
 
         .tag-category {
-            font-family: 'ISO 3098', monospace;
             font-size: 12px;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -203,7 +196,6 @@
         }
 
         .hero-title {
-            font-family: 'ISO 3098', monospace;
             font-size: 22px;
             line-height: 1.3;
             font-weight: normal;
@@ -214,14 +206,12 @@
         }
 
         .hero-description {
-            font-family: 'ISO 3098', monospace;
             font-size: 14px;
             color: rgba(255, 255, 255, 0.85);
             max-width: 650px;
             line-height: 1.4;
         }
 
-        /* GRILLE DE DEUX VOLETS / CARDS SECONDAIRES */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -237,7 +227,6 @@
         }
 
         .card-title {
-            font-family: 'ISO 3098', monospace;
             font-size: 16px;
             font-weight: normal;
             margin-bottom: 8px;
@@ -246,7 +235,6 @@
         }
 
         .card-desc {
-            font-family: 'ISO 3098', monospace;
             font-size: 13px;
             color: rgba(255, 255, 255, 0.75);
         }
@@ -261,7 +249,7 @@
             background: rgba(0, 0, 0, 0.3);
         }
 
-        /* --- PANNEAU LATÉRAL DROIT --- */
+        /* --- PANNEAU DROIT --- */
         .side-panel {
             width: 300px;
             padding: 25px 20px;
@@ -271,7 +259,6 @@
         }
 
         .panel-header {
-            font-family: 'ISO 3098', monospace;
             font-size: 14px;
             font-weight: normal;
             letter-spacing: 1px;
@@ -299,13 +286,11 @@
         }
 
         .status-name {
-            font-family: 'ISO 3098', monospace;
             font-size: 13px;
             text-transform: uppercase;
         }
 
         .status-badge {
-            font-family: 'ISO 3098', monospace;
             font-size: 11px;
             padding: 3px 8px;
             border-radius: 12px;
@@ -324,44 +309,42 @@
             border: 1px solid rgba(234, 179, 8, 0.4);
         }
 
-        /* RESPONSIVE DESIGN */
+        /* --- RESPONSIVE --- */
         @media (max-width: 1024px) {
-            .app-container {
-                flex-direction: column;
-            }
+            .app-container { flex-direction: column; }
             .sidebar-nav {
                 width: 100%;
                 height: auto;
                 flex-direction: row;
                 justify-content: center;
             }
-            .side-panel {
-                width: 100%;
+            .side-panel { width: 100%; }
+        }
+
+        /* Respect des préférences d'accessibilité */
+        @media (prefers-reduced-motion: reduce) {
+            .floating-window-1, .floating-window-2, .glass-panel:hover {
+                animation: none;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- FOND VIDÉO DYNAMIQUE (IFRAME CLOUDINARY AVEC INTEGRATION THÉÂTRALE) -->
+    <!-- VIDÉO DE FOND : URL directe Cloudinary (pas le lecteur embed) -->
     <div class="video-bg-container">
-        <iframe src="https://player.cloudinary.com/embed/?cloud_name=ljye26cz&public_id=istockphoto-1624246625-640_adpp_is&autoplay=true&loop=true&controls=false&muted=true" 
-                allow="autoplay; fullscreen" 
-                title="Fond Sol en Mouvement">
-        </iframe>
+        <video id="bgVideo" autoplay muted loop playsinline preload="auto">
+            <source src="https://res.cloudinary.com/ljye26cz/video/upload/istockphoto-1624246625-640_adpp_is.mp4" type="video/mp4">
+            <source src="https://res.cloudinary.com/ljye26cz/video/upload/istockphoto-1624246625-640_adpp_is.webm" type="video/webm">
+        </video>
     </div>
 
-    <!-- OVERLAY TRANSPARENT THÉÂTRAL -->
     <div class="bg-overlay"></div>
 
-    <!-- APPLICATION DE SURFACE SUR-ÉLEVÉE -->
     <div class="app-container">
 
-        <!-- BARRE DE NAVIGATION LATÉRALE AVEC LIENS INDÉPENDANTS -->
         <nav class="sidebar-nav glass-panel floating-window-1">
-            <div class="brand-logo">
-                <i class="fa-solid fa-bolt"></i>
-            </div>
+            <div class="brand-logo"><i class="fa-solid fa-bolt"></i></div>
             <a href="index.html" class="nav-link active" title="Accueil"><i class="fa-solid fa-house"></i></a>
             <a href="articles.html" class="nav-link" title="Articles"><i class="fa-solid fa-newspaper"></i></a>
             <a href="projets.html" class="nav-link" title="Projets"><i class="fa-solid fa-cube"></i></a>
@@ -370,10 +353,8 @@
             <a href="parametres.html" class="nav-link" title="Paramètres"><i class="fa-solid fa-gear"></i></a>
         </nav>
 
-        <!-- CONTENU CENTRAL PRINCIPAL -->
         <main class="main-content">
-            
-            <!-- CADRE HEADER PRINCIPAL -->
+
             <section class="hero-banner glass-panel floating-window-1">
                 <span class="tag-category">ARTICLE EXCLUSIF</span>
                 <h1 class="hero-title">Le saut quantique de la mécanique pure</h1>
@@ -382,9 +363,7 @@
                 </p>
             </section>
 
-            <!-- GRILLE DE DEUX CADRES SECONDAIRES -->
             <div class="cards-grid">
-                
                 <article class="info-card glass-panel floating-window-2">
                     <div>
                         <span class="tag-category">MOBILITÉ</span>
@@ -402,15 +381,12 @@
                     </div>
                     <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="Turbine" class="card-img-placeholder">
                 </article>
-
             </div>
 
         </main>
 
-        <!-- PANNEAU LATÉRAL DROIT (PROTOTYPES ET STATUS) -->
         <aside class="side-panel glass-panel floating-window-2">
             <h2 class="panel-header">Prototypes en Développement</h2>
-            
             <ul class="status-list">
                 <li class="status-item">
                     <span class="status-name">Prototype 1</span>
@@ -432,6 +408,18 @@
         </aside>
 
     </div>
+
+    <script>
+        // Certains navigateurs bloquent l'autoplay : on force la lecture
+        // et on la relance au premier contact de l'utilisateur si besoin.
+        const v = document.getElementById('bgVideo');
+        v.muted = true;
+        v.play().catch(() => {
+            ['click', 'touchstart', 'scroll'].forEach(evt =>
+                window.addEventListener(evt, () => v.play(), { once: true })
+            );
+        });
+    </script>
 
 </body>
 </html>
