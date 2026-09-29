@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MECAPEX - Le Saut Quantique de la Mécanique Pure</title>
     
-    <!-- Polices ISO 3098 / osifont (Normalisation technique ISO 3098) -->
+    <!-- Polices ISO 3098 / osifont (Normalisation technique EN ISO 3098) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -14,9 +14,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* Importation directe de la police ISO 3098 (osifont) */
+        /* Chargement de la police EN ISO 3098 (osifont) */
         @font-face {
-            font-family: 'ISO 3098';
+            font-family: 'EN ISO 3098';
             src: url('https://cdn.jsdelivr.net/gh/openscad/osifont@master/osifont.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
@@ -26,20 +26,21 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            /* Force l'utilisation exclusive de la police EN ISO 3098 */
+            font-family: 'EN ISO 3098', 'Share Tech Mono', monospace, sans-serif !important;
         }
 
         body, html {
             width: 100%;
             height: 100%;
             overflow-x: hidden;
-            font-family: 'ISO 3098', 'Share Tech Mono', monospace, sans-serif;
             color: #ffffff;
             background-color: #0b0f19;
             font-size: 14px;
             line-height: 1.4;
         }
 
-        /* --- FOND VIDÉO IFRAME CLOUDINARY (EFFET THÉÂTRAL) --- */
+        /* --- SYSTÈME NATIVE DE FOND VIDÉO HTML5 --- */
         .video-bg-container {
             position: fixed;
             top: 0;
@@ -48,30 +49,26 @@
             height: 100vh;
             z-index: -2;
             overflow: hidden;
-            pointer-events: none;
             background: #000;
         }
 
-        .video-bg-container iframe {
+        .video-bg-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Remplit tout l'écran sans déformer */
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100vw;
-            height: 56.25vw; /* Ratio 16:9 */
-            min-height: 100vh;
-            min-width: 177.77vh; /* Ratio 16:9 */
-            transform: translate(-50%, -50%) scale(1.15);
-            border: none;
+            top: 0;
+            left: 0;
         }
 
-        /* Overlay théâtral (vignettage sombre autour des bords) */
+        /* Overlay théâtral (assombrissement radial) */
         .bg-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, rgba(11, 15, 25, 0.2) 20%, rgba(5, 8, 15, 0.75) 80%, rgba(0, 0, 0, 0.95) 100%);
+            background: radial-gradient(circle at center, rgba(11, 15, 25, 0.25) 10%, rgba(5, 8, 15, 0.8) 75%, rgba(0, 0, 0, 0.95) 100%);
             z-index: -1;
             pointer-events: none;
         }
@@ -85,19 +82,19 @@
             align-items: stretch;
         }
 
-        /* --- STYLE GLASSMORPHISME TRANSPARENT POUR TOUTES LES FRAMES --- */
+        /* --- STYLE GLASSMORPHISME TRANSPARENT --- */
         .glass-panel {
-            background: rgba(15, 23, 42, 0.25);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4),
+            background: rgba(15, 23, 42, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5),
                         inset 0 0 10px rgba(255, 255, 255, 0.05);
             border-radius: 16px;
             transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
         }
 
-        /* --- ANIMATION D'AGITATION AU SURVOL DES CADRES --- */
+        /* --- ANIMATION D'AGITATION AU SURVOL --- */
         .glass-panel:hover {
             animation: shake 0.4s ease-in-out infinite alternate;
             background: rgba(255, 255, 255, 0.12);
@@ -112,7 +109,7 @@
             100% { transform: translate(1px, 1px) rotate(0.3deg); }
         }
 
-        /* --- ANIMATIONS DE FLOTTAISON DE BASE --- */
+        /* FLOTTAISON DE BASE */
         .floating-window-1 {
             animation: floatSoft1 10s ease-in-out infinite alternate;
         }
@@ -137,7 +134,7 @@
             100% { transform: translateY(-10px); }
         }
 
-        /* --- BARRE DE NAVIGATION LATÉRALE (MENU) --- */
+        /* --- BARRE DE NAVIGATION LATÉRALE --- */
         .sidebar-nav {
             width: 65px;
             display: flex;
@@ -192,8 +189,8 @@
             overflow: hidden;
         }
 
+        /* --- HARMONISATION TYPOGRAPHIQUE HARMONIEUSE (EN ISO 3098) --- */
         .tag-category {
-            font-family: 'ISO 3098', monospace;
             font-size: 12px;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -203,7 +200,6 @@
         }
 
         .hero-title {
-            font-family: 'ISO 3098', monospace;
             font-size: 22px;
             line-height: 1.3;
             font-weight: normal;
@@ -214,14 +210,13 @@
         }
 
         .hero-description {
-            font-family: 'ISO 3098', monospace;
             font-size: 14px;
             color: rgba(255, 255, 255, 0.85);
             max-width: 650px;
             line-height: 1.4;
         }
 
-        /* GRILLE DE DEUX VOLETS / CARDS SECONDAIRES */
+        /* GRILLE DES CARDS SECONDAIRES */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -237,7 +232,6 @@
         }
 
         .card-title {
-            font-family: 'ISO 3098', monospace;
             font-size: 16px;
             font-weight: normal;
             margin-bottom: 8px;
@@ -246,7 +240,6 @@
         }
 
         .card-desc {
-            font-family: 'ISO 3098', monospace;
             font-size: 13px;
             color: rgba(255, 255, 255, 0.75);
         }
@@ -271,7 +264,6 @@
         }
 
         .panel-header {
-            font-family: 'ISO 3098', monospace;
             font-size: 14px;
             font-weight: normal;
             letter-spacing: 1px;
@@ -299,13 +291,11 @@
         }
 
         .status-name {
-            font-family: 'ISO 3098', monospace;
             font-size: 13px;
             text-transform: uppercase;
         }
 
         .status-badge {
-            font-family: 'ISO 3098', monospace;
             font-size: 11px;
             padding: 3px 8px;
             border-radius: 12px;
@@ -343,15 +333,15 @@
 </head>
 <body>
 
-    <!-- FOND VIDÉO DYNAMIQUE (IFRAME CLOUDINARY AVEC INTEGRATION THÉÂTRALE) -->
+    <!-- FOND VIDÉO HTML5 DIRECT AVEC LECTURE AUTOMATIQUE EN BOUCLE (THÉÂTRAL) -->
     <div class="video-bg-container">
-        <iframe src="https://player.cloudinary.com/embed/?cloud_name=ljye26cz&public_id=istockphoto-1624246625-640_adpp_is&autoplay=true&loop=true&controls=false&muted=true" 
-                allow="autoplay; fullscreen" 
-                title="Fond Sol en Mouvement">
-        </iframe>
+        <video autoplay loop muted playsinline poster="https://res.cloudinary.com/ljye26cz/video/upload/v1/istockphoto-1624246625-640_adpp_is.jpg">
+            <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1/istockphoto-1624246625-640_adpp_is.mp4" type="video/mp4">
+            <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1/istockphoto-1624246625-640_adpp_is.webm" type="video/webm">
+        </video>
     </div>
 
-    <!-- OVERLAY TRANSPARENT THÉÂTRAL -->
+    <!-- OVERLAY TRANSPARENT THÉÂTRAL (VIGNETTAGE SOMBRE) -->
     <div class="bg-overlay"></div>
 
     <!-- APPLICATION DE SURFACE SUR-ÉLEVÉE -->
