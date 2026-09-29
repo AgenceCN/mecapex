@@ -73,7 +73,6 @@
             pointer-events: none;
         }
 
-        /* Vignettage sombre (placé après le canvas dans le HTML) */
         .bg-overlay {
             position: fixed;
             inset: 0;
@@ -189,10 +188,44 @@
             gap: 20px;
         }
 
+        /* --- CADRE HERO : TEXTE À GAUCHE / VIDÉO À DROITE --- */
         .hero-banner {
             padding: 25px 30px;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .hero-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Fenêtre de la vidéo : taille réduite de 30 % (220px -> 154px)
+           et largeur visible = 40 % de la vidéo (30 % coupés de chaque côté) */
+        .hero-video-wrap {
+            flex: 0 0 28%;
+            height: 154px;
+            overflow: hidden;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        /* La vidéo fait 250 % de la fenêtre (= 70 % de la largeur d'origine),
+           décalée de 75 % pour ne montrer que la partie centrale (40 %) */
+        .hero-video-wrap video {
+            position: absolute;
+            top: 0;
+            left: -75%;
+            width: 250%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .tag-category {
@@ -218,17 +251,6 @@
             color: rgba(255, 255, 255, 0.9);
             max-width: 650px;
             line-height: 1.4;
-        }
-
-        .hero-video {
-            width: 100%;
-            height: 220px;
-            border-radius: 10px;
-            object-fit: cover;
-            margin-top: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: rgba(0, 0, 0, 0.3);
-            display: block;
         }
 
         .cards-grid {
@@ -341,6 +363,22 @@
             .side-panel { width: 100%; }
         }
 
+        /* Sur petit écran : texte au-dessus, vidéo en dessous */
+        @media (max-width: 700px) {
+            .hero-banner {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .hero-video-wrap {
+                flex: none;
+                width: 100%;
+            }
+            .hero-video-wrap video {
+                left: 0;
+                width: 100%;
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .floating-window-1, .floating-window-2, .glass-panel:hover {
                 animation: none;
@@ -378,14 +416,18 @@
         <main class="main-content">
 
             <section class="hero-banner glass-panel floating-window-1">
-                <span class="tag-category">ARTICLE EXCLUSIF</span>
-                <h1 class="hero-title">Le saut quantique de la mécanique pure</h1>
-                <p class="hero-description">
-                    Micro-assemblage robotisé exploitant une lévitation magnétique haute fréquence et une cinématique de nouvelle génération.
-                </p>
-                <video class="hero-video" autoplay muted loop playsinline preload="auto">
-                    <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790712468/istockphoto-1376146865-640_adpp_is.mp4" type="video/mp4">
-                </video>
+                <div class="hero-text">
+                    <span class="tag-category">ARTICLE EXCLUSIF</span>
+                    <h1 class="hero-title">Le saut quantique de la mécanique pure</h1>
+                    <p class="hero-description">
+                        Micro-assemblage robotisé exploitant une lévitation magnétique haute fréquence et une cinématique de nouvelle génération.
+                    </p>
+                </div>
+                <div class="hero-video-wrap">
+                    <video autoplay muted loop playsinline preload="auto">
+                        <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790712468/istockphoto-1376146865-640_adpp_is.mp4" type="video/mp4">
+                    </video>
+                </div>
             </section>
 
             <div class="cards-grid">
@@ -465,7 +507,7 @@
             const isMobile     = window.innerWidth < 768;
             const COLS         = isMobile ? 50  : 80;    // particules en largeur
             const ROWS         = isMobile ? 160 : 260;   // particules en profondeur
-            const PARTICLE_SIZE = isMobile ? 5 : 4;
+            const PARTICLE_SIZE = isMobile ? 20 : 16;    // taille (x4 par rapport à avant)
             const PARTICLE_COLOR = 0xd1d5db;             // gris clair
             const WAVE_SPEED   = 1;                      // vitesse des vagues
             const WAVE_HEIGHT  = 1;                      // amplitude des vagues
@@ -549,7 +591,6 @@
                 for (let k = 0; k < count; k++) {
                     const x = baseX[k];
                     const z = baseZ[k];
-                    // Somme de plusieurs ondes pour un rendu de mer
                     const y =
                         Math.sin(x * 0.012 + t * 1.1) * 28 +
                         Math.sin(z * 0.006 + t * 1.6) * 48 +
