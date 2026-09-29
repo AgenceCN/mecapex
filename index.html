@@ -5,15 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MECAPEX - Le Saut Quantique de la Mécanique Pure</title>
     
-    <!-- Polices Google : Marelle (style manuscrit / marelle), Orbitron et Rajdhani -->
+    <!-- Polices ISO 3098 / osifont (Normalisation technique ISO 3098) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Marelle:wght@500;700&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
     <!-- FontAwesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* Importation directe de la police ISO 3098 (osifont) */
+        @font-face {
+            font-family: 'ISO 3098';
+            src: url('https://cdn.jsdelivr.net/gh/openscad/osifont@master/osifont.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -24,12 +32,14 @@
             width: 100%;
             height: 100%;
             overflow-x: hidden;
-            font-family: 'Marelle', cursive, sans-serif;
+            font-family: 'ISO 3098', 'Share Tech Mono', monospace, sans-serif;
             color: #ffffff;
             background-color: #0b0f19;
+            font-size: 14px;
+            line-height: 1.4;
         }
 
-        /* --- FOND VIDÉO DIRECTE --- */
+        /* --- FOND VIDÉO IFRAME CLOUDINARY (EFFET THÉÂTRAL) --- */
         .video-bg-container {
             position: fixed;
             top: 0;
@@ -39,26 +49,29 @@
             z-index: -2;
             overflow: hidden;
             pointer-events: none;
+            background: #000;
         }
 
-        .video-bg-container video {
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover;
+        .video-bg-container iframe {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            width: 100vw;
+            height: 56.25vw; /* Ratio 16:9 */
+            min-height: 100vh;
+            min-width: 177.77vh; /* Ratio 16:9 */
+            transform: translate(-50%, -50%) scale(1.15);
+            border: none;
         }
 
-        /* Overlay léger pour garantir le contraste du texte */
+        /* Overlay théâtral (vignettage sombre autour des bords) */
         .bg-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, rgba(15, 23, 42, 0.15) 0%, rgba(10, 15, 29, 0.55) 100%);
+            background: radial-gradient(circle at center, rgba(11, 15, 25, 0.2) 20%, rgba(5, 8, 15, 0.75) 80%, rgba(0, 0, 0, 0.95) 100%);
             z-index: -1;
             pointer-events: none;
         }
@@ -74,32 +87,32 @@
 
         /* --- STYLE GLASSMORPHISME TRANSPARENT POUR TOUTES LES FRAMES --- */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3),
-                        inset 0 0 15px rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
+            background: rgba(15, 23, 42, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4),
+                        inset 0 0 10px rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
             transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
         }
 
         /* --- ANIMATION D'AGITATION AU SURVOL DES CADRES --- */
         .glass-panel:hover {
             animation: shake 0.4s ease-in-out infinite alternate;
-            background: rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.12);
             border-color: rgba(255, 255, 255, 0.4);
         }
 
         @keyframes shake {
             0% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(-3px, 2px) rotate(-1deg); }
-            50% { transform: translate(3px, -1px) rotate(1deg); }
-            75% { transform: translate(-2px, -2px) rotate(-0.5deg); }
-            100% { transform: translate(2px, 1px) rotate(0.5deg); }
+            25% { transform: translate(-2px, 1px) rotate(-0.5deg); }
+            50% { transform: translate(2px, -1px) rotate(0.5deg); }
+            75% { transform: translate(-1px, -1px) rotate(-0.3deg); }
+            100% { transform: translate(1px, 1px) rotate(0.3deg); }
         }
 
-        /* --- ANIMATIONS DE FLOTTAISON DE BASE (QUAND PAS DE HOVER) --- */
+        /* --- ANIMATIONS DE FLOTTAISON DE BASE --- */
         .floating-window-1 {
             animation: floatSoft1 10s ease-in-out infinite alternate;
         }
@@ -113,45 +126,45 @@
         }
 
         @keyframes floatSoft1 {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-18px) rotate(0.8deg); }
-            100% { transform: translateY(12px) rotate(-0.5deg); }
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-14px); }
+            100% { transform: translateY(10px); }
         }
 
         @keyframes floatSoft2 {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(16px) rotate(-0.7deg); }
-            100% { transform: translateY(-14px) rotate(0.6deg); }
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(14px); }
+            100% { transform: translateY(-10px); }
         }
 
         /* --- BARRE DE NAVIGATION LATÉRALE (MENU) --- */
         .sidebar-nav {
-            width: 70px;
+            width: 65px;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px 0;
-            gap: 20px;
+            gap: 18px;
             z-index: 10;
         }
 
         .brand-logo {
-            font-size: 22px;
+            font-size: 20px;
             color: #38bdf8;
             margin-bottom: 10px;
             text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
         }
 
         .nav-link {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
             color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
-            font-size: 16px;
+            font-size: 15px;
             transition: all 0.3s ease;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -180,7 +193,7 @@
         }
 
         .tag-category {
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'ISO 3098', monospace;
             font-size: 12px;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -190,20 +203,22 @@
         }
 
         .hero-title {
-            font-family: 'Marelle', cursive;
-            font-size: 26px;
-            line-height: 1.2;
-            font-weight: 700;
-            margin-bottom: 12px;
-            text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-            letter-spacing: 0.5px;
+            font-family: 'ISO 3098', monospace;
+            font-size: 22px;
+            line-height: 1.3;
+            font-weight: normal;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .hero-description {
-            font-size: 20px;
+            font-family: 'ISO 3098', monospace;
+            font-size: 14px;
             color: rgba(255, 255, 255, 0.85);
             max-width: 650px;
-            line-height: 1.3;
+            line-height: 1.4;
         }
 
         /* GRILLE DE DEUX VOLETS / CARDS SECONDAIRES */
@@ -222,20 +237,28 @@
         }
 
         .card-title {
-            font-size: 24px;
-            font-weight: 700;
+            font-family: 'ISO 3098', monospace;
+            font-size: 16px;
+            font-weight: normal;
             margin-bottom: 8px;
-            line-height: 1.2;
+            line-height: 1.3;
+            text-transform: uppercase;
+        }
+
+        .card-desc {
+            font-family: 'ISO 3098', monospace;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.75);
         }
 
         .card-img-placeholder {
             width: 100%;
             height: 120px;
-            border-radius: 12px;
+            border-radius: 10px;
             object-fit: cover;
             margin-top: 12px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.3);
         }
 
         /* --- PANNEAU LATÉRAL DROIT --- */
@@ -248,10 +271,10 @@
         }
 
         .panel-header {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 2px;
+            font-family: 'ISO 3098', monospace;
+            font-size: 14px;
+            font-weight: normal;
+            letter-spacing: 1px;
             text-transform: uppercase;
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             padding-bottom: 10px;
@@ -262,7 +285,7 @@
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .status-item {
@@ -271,21 +294,22 @@
             align-items: center;
             padding: 10px 12px;
             background: rgba(255, 255, 255, 0.04);
-            border-radius: 10px;
+            border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .status-name {
-            font-size: 18px;
+            font-family: 'ISO 3098', monospace;
+            font-size: 13px;
+            text-transform: uppercase;
         }
 
         .status-badge {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 10px;
+            font-family: 'ISO 3098', monospace;
+            font-size: 11px;
             padding: 3px 8px;
-            border-radius: 15px;
+            border-radius: 12px;
             text-transform: uppercase;
-            font-weight: 600;
         }
 
         .badge-active {
@@ -319,14 +343,15 @@
 </head>
 <body>
 
-    <!-- FOND VIDÉO DYNAMIQUE (FLUX MP4 DIRECT) -->
+    <!-- FOND VIDÉO DYNAMIQUE (IFRAME CLOUDINARY AVEC INTEGRATION THÉÂTRALE) -->
     <div class="video-bg-container">
-        <video autoplay loop muted playsinline>
-            <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1/istockphoto-1624246625-640_adpp_is.mp4" type="video/mp4">
-        </video>
+        <iframe src="https://player.cloudinary.com/embed/?cloud_name=ljye26cz&public_id=istockphoto-1624246625-640_adpp_is&autoplay=true&loop=true&controls=false&muted=true" 
+                allow="autoplay; fullscreen" 
+                title="Fond Sol en Mouvement">
+        </iframe>
     </div>
 
-    <!-- OVERLAY TRANSPARENT -->
+    <!-- OVERLAY TRANSPARENT THÉÂTRAL -->
     <div class="bg-overlay"></div>
 
     <!-- APPLICATION DE SURFACE SUR-ÉLEVÉE -->
@@ -364,7 +389,7 @@
                     <div>
                         <span class="tag-category">MOBILITÉ</span>
                         <h2 class="card-title">Véhicules de concept sans carénage</h2>
-                        <p style="font-size: 18px; color: rgba(255,255,255,0.8);">Prototypage rapide à turbine intégrée.</p>
+                        <p class="card-desc">Prototypage rapide à turbine intégrée.</p>
                     </div>
                     <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80" alt="Concept Vehicle" class="card-img-placeholder">
                 </article>
@@ -373,7 +398,7 @@
                     <div>
                         <span class="tag-category">PROPULSION</span>
                         <h2 class="card-title">Turbines dynamiques à états gazeux</h2>
-                        <p style="font-size: 18px; color: rgba(255,255,255,0.8);">Flux thermiques optimisés par ia.</p>
+                        <p class="card-desc">Flux thermiques optimisés par IA.</p>
                     </div>
                     <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="Turbine" class="card-img-placeholder">
                 </article>
