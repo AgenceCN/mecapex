@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MECAPEX - Ingénierie & Mécanique Pure</title>
+    <title>MECAPEX - Le Saut Quantique de la Mécanique Pure</title>
     
     <!-- FontAwesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* --- IMPORTATION ET APPLICATION STRICTE DE LA POLICE EN ISO 3098 --- */
+        /* Importation et imposition globale de la police EN ISO 3098 (osifont) */
         @font-face {
             font-family: 'EN ISO 3098';
             src: url('https://cdn.jsdelivr.net/gh/openscad/osifont@master/osifont.ttf') format('truetype');
@@ -21,21 +21,20 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'EN ISO 3098', sans-serif !important;
+            font-family: 'EN ISO 3098', monospace, sans-serif !important;
         }
 
         body, html {
             width: 100%;
             height: 100%;
             overflow-x: hidden;
-            background-color: #050811;
             color: #ffffff;
-            /* Harmonisation de la taille de base (15px) */
-            font-size: 15px;
+            background-color: #0b0f19;
+            font-size: 14px;
             line-height: 1.4;
         }
 
-        /* --- FOND VIDÉO DE FOND (MÉTHODE 1 : BALISE VIDEO DIRECTE CLOUDINARY) --- */
+        /* --- CONTENEUR ARRIÈRE-PLAN VIDÉO THÉÂTRAL --- */
         .video-bg-container {
             position: fixed;
             top: 0;
@@ -44,32 +43,44 @@
             height: 100vh;
             z-index: -2;
             overflow: hidden;
+            pointer-events: none;
             background: #000;
         }
 
-        .video-bg-container video,
+        /* Video HTML5 directe (Lancement instantané et fluide) */
+        .video-bg-container video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%) scale(1.1);
+            object-fit: cover;
+        }
+
+        /* Fallback / Iframe Cloudinary configurée avec autorisations */
         .video-bg-container iframe {
             position: absolute;
             top: 50%;
             left: 50%;
             width: 100vw;
-            height: 56.25vw; /* Ratio 16:9 */
+            height: 56.25vw;
             min-height: 100vh;
             min-width: 177.77vh;
-            transform: translate(-50%, -50%) scale(1.1);
-            object-fit: cover;
+            transform: translate(-50%, -50%) scale(1.15);
             border: none;
-            pointer-events: none;
         }
 
-        /* OVERLAY THÉÂTRAL SOMBRE POUR L'EFFET DE FOND */
+        /* Overlay théâtral (vignettage sombre pour faire ressortir le texte) */
         .bg-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, rgba(5, 8, 17, 0.35) 0%, rgba(5, 8, 17, 0.8) 70%, rgba(0, 0, 0, 0.95) 100%);
+            background: radial-gradient(circle at center, rgba(11, 15, 25, 0.25) 20%, rgba(5, 8, 15, 0.75) 80%, rgba(0, 0, 0, 0.95) 100%);
             z-index: -1;
             pointer-events: none;
         }
@@ -78,60 +89,71 @@
         .app-container {
             display: flex;
             min-height: 100vh;
-            padding: 30px;
+            padding: 2% 4%;
             gap: 20px;
             align-items: stretch;
         }
 
-        /* --- EFFET GLASSMORPHISME & CADRES --- */
+        /* --- STYLE GLASSMORPHISME TRANSPARENT --- */
         .glass-panel {
-            background: rgba(15, 23, 42, 0.35);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-            border-radius: 12px;
-            transition: all 0.3s ease;
+            background: rgba(15, 23, 42, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4),
+                        inset 0 0 10px rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
         }
 
-        /* ANIMATION D'AGITATION / VIBRATION AU SURVOL */
+        /* --- ANIMATION D'AGITATION AU SURVOL DES CADRES --- */
         .glass-panel:hover {
-            animation: shake 0.35s ease-in-out infinite alternate;
-            background: rgba(255, 255, 255, 0.08);
+            animation: shake 0.4s ease-in-out infinite alternate;
+            background: rgba(255, 255, 255, 0.12);
             border-color: rgba(255, 255, 255, 0.4);
         }
 
         @keyframes shake {
             0% { transform: translate(0, 0) rotate(0deg); }
-            20% { transform: translate(-2px, 1px) rotate(-0.3deg); }
-            40% { transform: translate(2px, -1px) rotate(0.3deg); }
-            60% { transform: translate(-1px, -1px) rotate(-0.2deg); }
-            80% { transform: translate(1px, 1px) rotate(0.2deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-2px, 1px) rotate(-0.5deg); }
+            50% { transform: translate(2px, -1px) rotate(0.5deg); }
+            75% { transform: translate(-1px, -1px) rotate(-0.3deg); }
+            100% { transform: translate(1px, 1px) rotate(0.3deg); }
         }
 
-        /* ANIMATIONS DE FLOTTAISON DOUCE */
-        .float-1 { animation: float1 9s ease-in-out infinite alternate; }
-        .float-2 { animation: float2 11s ease-in-out infinite alternate; }
+        /* --- ANIMATIONS DE FLOTTAISON DE BASE --- */
+        .floating-window-1 {
+            animation: floatSoft1 10s ease-in-out infinite alternate;
+        }
 
-        @keyframes float1 {
+        .floating-window-2 {
+            animation: floatSoft2 13s ease-in-out infinite alternate;
+        }
+
+        .floating-window-1:hover, .floating-window-2:hover {
+            animation: shake 0.4s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatSoft1 {
             0% { transform: translateY(0px); }
-            100% { transform: translateY(-12px); }
+            50% { transform: translateY(-14px); }
+            100% { transform: translateY(10px); }
         }
 
-        @keyframes float2 {
+        @keyframes floatSoft2 {
             0% { transform: translateY(0px); }
-            100% { transform: translateY(12px); }
+            50% { transform: translateY(14px); }
+            100% { transform: translateY(-10px); }
         }
 
-        /* --- BARRE DE NAVIGATION (MENU) --- */
+        /* --- BARRE DE NAVIGATION LATÉRALE (MENU) --- */
         .sidebar-nav {
             width: 65px;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px 0;
-            gap: 16px;
+            gap: 18px;
             z-index: 10;
         }
 
@@ -139,31 +161,32 @@
             font-size: 20px;
             color: #38bdf8;
             margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
         }
 
         .nav-link {
-            width: 42px;
-            height: 42px;
-            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
             color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
-            font-size: 16px;
-            transition: all 0.2s ease;
-            background: rgba(255, 255, 255, 0.04);
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .nav-link:hover, .nav-link.active {
             color: #ffffff;
             background: rgba(56, 189, 248, 0.25);
-            border-color: #38bdf8;
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+            border-color: rgba(56, 189, 248, 0.6);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
         }
 
-        /* --- CONTENU PRINCIPAL & HARMONISATION DES TAILLES --- */
+        /* --- CONTENU PRINCIPAL --- */
         .main-content {
             flex: 1;
             display: flex;
@@ -171,43 +194,38 @@
             gap: 20px;
         }
 
-        /* HARMONISATION DE TAILLE DES TITRES & TEXTES */
-        h1 {
-            font-size: 24px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            color: #ffffff;
-        }
-
-        h2 {
-            font-size: 18px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-            color: #f8fafc;
-        }
-
-        p, span, a, li {
-            font-size: 14px;
-            color: rgba(241, 245, 249, 0.85);
-        }
-
+        /* HARMONISATION DES TAILLES DE TEXTES EN ISO 3098 */
         .tag-category {
             font-size: 12px;
             letter-spacing: 2px;
             text-transform: uppercase;
             color: #38bdf8;
+            margin-bottom: 8px;
             display: inline-block;
-            margin-bottom: 6px;
         }
 
-        /* EN-TÊTE HERO */
         .hero-banner {
             padding: 25px 30px;
         }
 
-        /* GRILLE DE CARDS */
+        .hero-title {
+            font-size: 22px;
+            line-height: 1.3;
+            font-weight: normal;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hero-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.85);
+            max-width: 650px;
+            line-height: 1.4;
+        }
+
+        /* GRILLE DE CARDS SECONDAIRES */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -219,31 +237,49 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            min-height: 200px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: normal;
+            margin-bottom: 8px;
+            line-height: 1.3;
+            text-transform: uppercase;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.75);
         }
 
         .card-img-placeholder {
             width: 100%;
-            height: 130px;
-            border-radius: 8px;
+            height: 120px;
+            border-radius: 10px;
             object-fit: cover;
-            margin-top: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            margin-top: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
         }
 
         /* --- PANNEAU LATÉRAL DROIT --- */
         .side-panel {
-            width: 320px;
+            width: 300px;
             padding: 25px 20px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 18px;
         }
 
         .panel-header {
-            font-size: 16px;
+            font-size: 14px;
+            font-weight: normal;
+            letter-spacing: 1px;
             text-transform: uppercase;
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            padding-bottom: 8px;
+            padding-bottom: 10px;
+            color: #f0f9ff;
         }
 
         .status-list {
@@ -258,15 +294,20 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .status-name {
+            font-size: 13px;
+            text-transform: uppercase;
         }
 
         .status-badge {
             font-size: 11px;
             padding: 3px 8px;
-            border-radius: 4px;
+            border-radius: 12px;
             text-transform: uppercase;
         }
 
@@ -284,76 +325,89 @@
 
         /* RESPONSIVE DESIGN */
         @media (max-width: 1024px) {
-            .app-container { flex-direction: column; }
-            .sidebar-nav { width: 100%; flex-direction: row; justify-content: center; }
-            .side-panel { width: 100%; }
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar-nav {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                justify-content: center;
+            }
+            .side-panel {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- CONTENEUR VIDÉO DE FOND THÉÂTRAL -->
+    <!-- FOND VIDÉO THÉÂTRAL (FLUX DIRECT MP4 CLOUDINARY + FALLBACK IFRAME) -->
     <div class="video-bg-container">
-        <!-- 1. Balise native vidéo HTML5 (méthode directe fiable) -->
-        <video autoplay loop muted playsinline poster="https://res.cloudinary.com/ljye26cz/video/upload/istockphoto-1624246625-640_adpp_is.jpg">
+        <video autoplay loop muted playsinline poster="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80">
             <source src="https://res.cloudinary.com/ljye26cz/video/upload/istockphoto-1624246625-640_adpp_is.mp4" type="video/mp4">
-            
-            <!-- 2. Fallback Iframe avec autorisations complètes d'autoplay si la balise vidéo échoue -->
-            <iframe src="https://player.cloudinary.com/embed/?cloud_name=ljye26cz&public_id=istockphoto-1624246625-640_adpp_is&autoplay=true&loop=true&controls=false&muted=true" 
-                    allow="autoplay; fullscreen; picture-in-picture" 
-                    tabindex="-1">
-            </iframe>
+            <!-- Fallback Iframe avec politique d'autorisation autoplay -->
+            <iframe
+  src="https://player.cloudinary.com/embed/?cloud_name=ljye26cz&public_id=istockphoto-1624246625-640_adpp_is"
+  width="640"
+  height="360" 
+  style="height: auto; width: 100%; aspect-ratio: 640 / 360;"
+  allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+  allowfullscreen
+  frameborder="0"
+></iframe>
+           
         </video>
     </div>
 
-    <!-- OVERLAY ASSOMBRISSANT POUR AMBIANCE THÉÂTRALE -->
+    <!-- OVERLAY TRANSPARENT THÉÂTRAL -->
     <div class="bg-overlay"></div>
 
-    <!-- STRUCTURE GLOBALE DE L'APPLICATION -->
+    <!-- APPLICATION DE SURFACE SUR-ÉLEVÉE -->
     <div class="app-container">
 
-        <!-- MENU LATÉRAL -->
-        <nav class="sidebar-nav glass-panel float-1">
+        <!-- BARRE DE NAVIGATION LATÉRALE -->
+        <nav class="sidebar-nav glass-panel floating-window-1">
             <div class="brand-logo">
-                <i class="fa-solid fa-gear"></i>
+                <i class="fa-solid fa-bolt"></i>
             </div>
             <a href="index.html" class="nav-link active" title="Accueil"><i class="fa-solid fa-house"></i></a>
             <a href="articles.html" class="nav-link" title="Articles"><i class="fa-solid fa-newspaper"></i></a>
-            <a href="projets.html" class="nav-link" title="Projets"><i class="fa-solid fa-cubes"></i></a>
+            <a href="projets.html" class="nav-link" title="Projets"><i class="fa-solid fa-cube"></i></a>
             <a href="stats.html" class="nav-link" title="Statistiques"><i class="fa-solid fa-chart-line"></i></a>
-            <a href="equipe.html" class="nav-link" title="Équipe"><i class="fa-solid fa-users"></i></a>
-            <a href="parametres.html" class="nav-link" title="Paramètres"><i class="fa-solid fa-sliders"></i></a>
+            <a href="equipe.html" class="nav-link" title="Équipe"><i class="fa-solid fa-user-group"></i></a>
+            <a href="parametres.html" class="nav-link" title="Paramètres"><i class="fa-solid fa-gear"></i></a>
         </nav>
 
-        <!-- ZONE DE CONTENU CENTRAL -->
+        <!-- CONTENU CENTRAL PRINCIPAL -->
         <main class="main-content">
             
-            <!-- HEADER PRINCIPAL -->
-            <section class="hero-banner glass-panel float-1">
-                <span class="tag-category">NORME EN ISO 3098</span>
-                <h1>Le saut quantique de la mécanique pure</h1>
-                <p>
+            <!-- CADRE HEADER PRINCIPAL -->
+            <section class="hero-banner glass-panel floating-window-1">
+                <span class="tag-category">ARTICLE EXCLUSIF</span>
+                <h1 class="hero-title">Le saut quantique de la mécanique pure</h1>
+                <p class="hero-description">
                     Micro-assemblage robotisé exploitant une lévitation magnétique haute fréquence et une cinématique de nouvelle génération.
                 </p>
             </section>
 
-            <!-- GRILLE DE CARTS SECONDAIRES -->
+            <!-- GRILLE DE DEUX CADRES SECONDAIRES -->
             <div class="cards-grid">
                 
-                <article class="info-card glass-panel float-2">
+                <article class="info-card glass-panel floating-window-2">
                     <div>
                         <span class="tag-category">MOBILITÉ</span>
-                        <h2>Prototypage rapide</h2>
-                        <p>Véhicules de concept à turbine intégrée sans carénage.</p>
+                        <h2 class="card-title">Véhicules de concept sans carénage</h2>
+                        <p class="card-desc">Prototypage rapide à turbine intégrée.</p>
                     </div>
                     <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80" alt="Concept Vehicle" class="card-img-placeholder">
                 </article>
 
-                <article class="info-card glass-panel float-1">
+                <article class="info-card glass-panel floating-window-1">
                     <div>
                         <span class="tag-category">PROPULSION</span>
-                        <h2>Turbines dynamiques</h2>
-                        <p>Optimisation des flux thermiques à états gazeux par IA.</p>
+                        <h2 class="card-title">Turbines dynamiques à états gazeux</h2>
+                        <p class="card-desc">Flux thermiques optimisés par IA.</p>
                     </div>
                     <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80" alt="Turbine" class="card-img-placeholder">
                 </article>
@@ -362,26 +416,26 @@
 
         </main>
 
-        <!-- PANNEAU DROIT -->
-        <aside class="side-panel glass-panel float-2">
-            <h2 class="panel-header">Prototypes en Cours</h2>
+        <!-- PANNEAU LATÉRAL DROIT -->
+        <aside class="side-panel glass-panel floating-window-2">
+            <h2 class="panel-header">Prototypes en Développement</h2>
             
             <ul class="status-list">
                 <li class="status-item">
-                    <span>PROTOTYPE 01</span>
-                    <span class="status-badge badge-active">OPÉRATIONNEL</span>
+                    <span class="status-name">Prototype 1</span>
+                    <span class="status-badge badge-active">opérationnel</span>
                 </li>
                 <li class="status-item">
-                    <span>PROTOTYPE 02</span>
-                    <span class="status-badge badge-active">EN TEST</span>
+                    <span class="status-name">Prototype 2</span>
+                    <span class="status-badge badge-active">en test</span>
                 </li>
                 <li class="status-item">
-                    <span>PROTOTYPE 03</span>
-                    <span class="status-badge badge-pending">EN ATTENTE</span>
+                    <span class="status-name">Prototype 3</span>
+                    <span class="status-badge badge-pending">en attente</span>
                 </li>
                 <li class="status-item">
-                    <span>PROTOTYPE 04</span>
-                    <span class="status-badge badge-pending">CONCEPTION</span>
+                    <span class="status-name">Prototype 4</span>
+                    <span class="status-badge badge-pending">conception</span>
                 </li>
             </ul>
         </aside>
