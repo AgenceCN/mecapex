@@ -63,13 +63,13 @@
             object-fit: cover;
         }
 
-        /* --- CANVAS DES PARTICULES (cadres centraux) --- */
+        /* --- CANVAS DES PARTICULES : ARRIÈRE-PLAN, DERRIÈRE LE TEXTE ET LES VIDÉOS --- */
         #aura-canvas {
             position: fixed;
             inset: 0;
             width: 100%;
             height: 100%;
-            z-index: 5;
+            z-index: 0;              /* sous .app-container (z-index: 1) */
             pointer-events: none;
         }
 
@@ -107,7 +107,14 @@
             border-color: rgba(255, 255, 255, 0.6);
         }
 
-        /* Lueur neutre (blanche) uniquement sur les cadres centraux */
+        /* Cadres centraux : cadre filaire supprimé (bordure invisible, même au survol) */
+        .hero-banner,
+        .info-card,
+        .hero-banner:hover,
+        .info-card:hover {
+            border-color: transparent;
+        }
+
         .hero-banner,
         .info-card {
             box-shadow:
@@ -408,7 +415,7 @@
 
     <div class="bg-overlay"></div>
 
-    <!-- PARTICULES DANS LES CADRES CENTRAUX -->
+    <!-- PARTICULES (arrière-plan, derrière le texte et les vidéos) -->
     <canvas id="aura-canvas"></canvas>
 
     <div class="app-container">
@@ -504,22 +511,22 @@
             });
         });
 
-        // ===== PARTICULES GRISES QUI DÉAMBULENT DANS LES CADRES CENTRAUX =====
+        // ===== PARTICULES GRIS ANTHRACITE QUI DÉAMBULENT DANS LES CADRES CENTRAUX =====
         (function () {
 
             // --- Réglages ---
             const CONFIG = {
                 selector:      '.hero-banner, .info-card',  // uniquement les cadres centraux
-                density:       50 / 13,  // particules par pixel de périmètre (x50 par rapport à avant)
-                maxPerPanel:   4500,     // plafond de particules par cadre (90 x 50)
+                density:       (50 / 13) * 0.7,  // particules par pixel de périmètre (−30 %)
+                maxPerPanel:   3150,     // plafond de particules par cadre (4500 x 0,7)
                 zoneMin:       -1e6,     // limite intérieure (aucune : tout l'intérieur du cadre)
                 zoneMax:       -4,       // les particules restent à au moins 4 px à l'intérieur du bord
-                speedMin:      8.4,      // vitesse minimale (px/s)   [6 x 1,4]
-                speedMax:      67.2,     // vitesse maximale (px/s)   [48 x 1,4]
+                speedMin:      8.4,      // vitesse minimale (px/s)
+                speedMax:      67.2,     // vitesse maximale (px/s)
                 pauseChance:   0.18,     // probabilité de s'arrêter un instant
-                turnFactor:    0.9,      // amplitude des virages (réduite de 10 %)
-                sizeMin:       2.5,      // taille minimale (px)
-                sizeMax:       6,        // taille maximale (px)
+                turnFactor:    0.9,      // amplitude des virages
+                sizeMin:       1.75,     // taille minimale (px)  [2,5 x 0,7]
+                sizeMax:       4.2,      // taille maximale (px)  [6 x 0,7]
                 cornerRadius:  16        // rayon des coins (doit suivre le CSS)
             };
 
@@ -533,8 +540,8 @@
             const ctx = canvas.getContext('2d');
             let W = 0, H = 0, dpr = 1;
 
-            // Sprites en nuances de gris uniquement (aucune couleur)
-            const GRAYS = [95, 125, 155, 180, 205, 225, 245];
+            // Sprites en nuances de gris anthracite (aucune couleur)
+            const GRAYS = [42, 50, 58, 66, 74, 84];
             const sprites = GRAYS.map(g => {
                 const s = document.createElement('canvas');
                 s.width = s.height = 64;
@@ -600,7 +607,7 @@
                     retarget: rand(1.5, 6),             // délai avant de changer d'allure
                     size: rand(CONFIG.sizeMin, CONFIG.sizeMax),
                     sprite: sprites[Math.floor(Math.random() * sprites.length)],
-                    alpha: rand(0.55, 1)
+                    alpha: rand(0.65, 1)
                 };
             }
 
@@ -682,7 +689,7 @@
                 const speedFactor = reduced ? 0.15 : 1;
 
                 ctx.clearRect(0, 0, W, H);
-                ctx.globalCompositeOperation = 'lighter';
+                ctx.globalCompositeOperation = 'source-over';   // gris anthracite fidèle (pas d'éclaircissement)
 
                 for (const pn of panels) {
                     const rect = pn.el.getBoundingClientRect();   // suit la flottaison et le tremblement
@@ -699,7 +706,6 @@
                     for (const p of pn.parts) {
                         if (step > 0) updateParticle(p, hw, hh, step);
 
-                        // Un seul point par particule
                         const size = p.size * 3;   // le sprite inclut son halo
                         ctx.globalAlpha = p.alpha;
                         ctx.drawImage(p.sprite, rect.left + p.x - size / 2, rect.top + p.y - size / 2, size, size);
@@ -707,7 +713,6 @@
                 }
 
                 ctx.globalAlpha = 1;
-                ctx.globalCompositeOperation = 'source-over';
             }
 
             window.addEventListener('resize', resize);
