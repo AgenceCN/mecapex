@@ -18,6 +18,11 @@
             font-style: normal;
         }
 
+        :root {
+            /* Hauteur commune aux 3 vidéos des articles (modifiable ici) */
+            --article-video-height: 140px;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -219,9 +224,10 @@
             min-width: 0;
         }
 
+        /* Vidéo du hero : même hauteur que les vidéos des cartes, l'excédent est tronqué (recadrage centré) */
         .hero-video-wrap {
             flex: 0 0 28%;
-            height: 154px;
+            height: var(--article-video-height);
             overflow: hidden;
             border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -232,10 +238,11 @@
         .hero-video-wrap video {
             position: absolute;
             top: 0;
-            left: -75%;
-            width: 250%;
+            left: 0;
+            width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center;
             display: block;
         }
 
@@ -293,9 +300,10 @@
 
         .card-video {
             width: 100%;
-            height: 140px;
+            height: var(--article-video-height);
             border-radius: 10px;
             object-fit: cover;
+            object-position: center;
             margin-top: 12px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             background: rgba(0, 0, 0, 0.3);
@@ -374,6 +382,7 @@
             .side-panel { width: 100%; }
         }
 
+        /* Sur petit écran : texte au-dessus, vidéo en dessous (même hauteur conservée) */
         @media (max-width: 700px) {
             .hero-banner {
                 flex-direction: column;
@@ -381,10 +390,6 @@
             }
             .hero-video-wrap {
                 flex: none;
-                width: 100%;
-            }
-            .hero-video-wrap video {
-                left: 0;
                 width: 100%;
             }
         }
