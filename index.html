@@ -63,7 +63,7 @@
             object-fit: cover;
         }
 
-        /* --- CANVAS DES SATELLITES (aura autour des cadres) --- */
+        /* --- CANVAS DES SATELLITES (aura autour des cadres centraux) --- */
         #aura-canvas {
             position: fixed;
             inset: 0;
@@ -96,9 +96,7 @@
         .glass-panel {
             background: transparent;
             border: 1px solid rgba(255, 255, 255, 0.35);
-            box-shadow:
-                0 8px 32px 0 rgba(0, 0, 0, 0.25),
-                0 0 22px 2px rgba(56, 189, 248, 0.12);   /* lueur d'aura douce */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
             border-radius: 16px;
             transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
@@ -107,9 +105,21 @@
             animation: shake 0.4s ease-in-out infinite alternate;
             background: rgba(255, 255, 255, 0.05);
             border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Lueur d'aura neutre (blanche) uniquement sur les cadres centraux */
+        .hero-banner,
+        .info-card {
             box-shadow:
                 0 8px 32px 0 rgba(0, 0, 0, 0.25),
-                0 0 34px 4px rgba(56, 189, 248, 0.28);
+                0 0 22px 2px rgba(255, 255, 255, 0.08);
+        }
+
+        .hero-banner:hover,
+        .info-card:hover {
+            box-shadow:
+                0 8px 32px 0 rgba(0, 0, 0, 0.25),
+                0 0 34px 4px rgba(255, 255, 255, 0.16);
         }
 
         .glass-panel h1, .glass-panel h2, .glass-panel p, .glass-panel span, .glass-panel li {
@@ -398,7 +408,7 @@
 
     <div class="bg-overlay"></div>
 
-    <!-- SATELLITES / AURA AUTOUR DES CADRES -->
+    <!-- PARTICULES AUTOUR DES CADRES CENTRAUX -->
     <canvas id="aura-canvas"></canvas>
 
     <div class="app-container">
@@ -494,25 +504,24 @@
             });
         });
 
-        // ===== PARTICULES SATELLITES AUTOUR DES CADRES =====
+        // ===== PARTICULES GRISES QUI DÉAMBULENT AUTOUR DES CADRES CENTRAUX =====
         (function () {
 
             // --- Réglages ---
             const CONFIG = {
-                density:       1 / 11,   // particules par pixel de périmètre (plus grand = plus de particules)
-                maxPerPanel:   140,      // plafond de particules par cadre
-                speedMin:      35,       // vitesse minimale (px/s)
-                speedMax:      110,      // vitesse maximale (px/s)
-                distMin:       6,        // distance minimale au cadre (px)
-                distMax:       30,       // distance maximale au cadre (px)
-                wobble:        5,        // amplitude d'oscillation radiale (px)
+                selector:      '.hero-banner, .info-card',  // uniquement les cadres centraux
+                density:       1 / 13,   // particules par pixel de périmètre
+                maxPerPanel:   90,       // plafond de particules par cadre
+                zoneMin:       7,        // distance minimale au cadre (px)
+                zoneMax:       40,       // distance maximale au cadre (px)
+                speedMin:      6,        // vitesse minimale de déambulation (px/s)
+                speedMax:      48,       // vitesse maximale de déambulation (px/s)
+                pauseChance:   0.18,     // probabilité de s'arrêter un instant
                 sizeMin:       2.5,      // taille minimale (px)
                 sizeMax:       6,        // taille maximale (px)
-                tailLength:    4,        // nombre de points de traînée
-                tailSpacing:   9,        // écart entre les points de traînée (px)
-                cyanRatio:     0.65,     // part de particules cyan (le reste = blanc)
-                reverseRatio:  0.3,      // part de particules qui tournent dans l'autre sens
-                cornerRadius:  16        // rayon des coins des cadres (doit suivre le CSS)
+                tailLength:    3,        // points de traînée
+                tailSpacing:   7,        // écart des points de traînée (px)
+                cornerRadius:  16        // rayon des coins (doit suivre le CSS)
             };
 
             const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -522,6 +531,90 @@
             const canvas = document.getElementById('aura-canvas');
             const ctx = canvas.getContext('2d');
             let W = 0, H = 0, dpr = 1;
+
+            // Sprites en nuances de gris uniquement (aucune couleur)
+            const GRAYS = [95, 125, 155, 180, 205, 225, 245];
+            const sprites = GRAYS.map(g => {
+                const s = document.createElement('canvas');
+                s.width = s.height = 64;
+                const c = s.getContext('2d');
+                const grad = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+                grad.addColorStop(0,    `rgba(${g},${g},${g},1)`);
+                grad.addColorStop(0.25, `rgba(${g},${g},${g},0.75)`);
+                grad.addColorStop(1,    `rgba(${g},${g},${g},0)`);
+                c.fillStyle = grad;
+                c.fillRect(0, 0, 64, 64);
+                return s;
+            });
+
+            const rand = (min, max) => min + Math.random() * (max - min);
+            const angDiff = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
+
+            // Distance signée à un rectangle arrondi + normale sortante
+            // (coordonnées relatives au centre du cadre)
+            function sdfRoundedRect(px, py, hw, hh, r, out) {
+                const qx = Math.abs(px) - (hw - r);
+                const qy = Math.abs(py) - (hh - r);
+                const ox = Math.max(qx, 0);
+                const oy = Math.max(qy, 0);
+                const len = Math.hypot(ox, oy);
+                out.d = len + Math.min(Math.max(qx, qy), 0) - r;
+
+                const sx = px < 0 ? -1 : 1;
+                const sy = py < 0 ? -1 : 1;
+                if (len > 0) {
+                    out.nx = sx * ox / len;
+                    out.ny = sy * oy / len;
+                } else if (qx > qy) {
+                    out.nx = sx; out.ny = 0;
+                } else {
+                    out.nx = 0; out.ny = sy;
+                }
+            }
+
+            const tmp = { d: 0, nx: 0, ny: 0 };
+
+            const panels = [];
+
+            function makeParticle(w, h) {
+                const hw = w / 2, hh = h / 2;
+                // Position de départ aléatoire dans la zone autour du cadre
+                let x = 0, y = 0, ok = false;
+                for (let t = 0; t < 60 && !ok; t++) {
+                    x = rand(-CONFIG.zoneMax, w + CONFIG.zoneMax);
+                    y = rand(-CONFIG.zoneMax, h + CONFIG.zoneMax);
+                    sdfRoundedRect(x - hw, y - hh, hw, hh, CONFIG.cornerRadius, tmp);
+                    ok = tmp.d >= CONFIG.zoneMin && tmp.d <= CONFIG.zoneMax;
+                }
+                if (!ok) { x = -CONFIG.zoneMin - 2; y = hh; }
+
+                const theta = rand(0, Math.PI * 2);
+                const target = Math.random() < CONFIG.pauseChance ? 0 : rand(CONFIG.speedMin, CONFIG.speedMax);
+                return {
+                    x, y,
+                    theta,                              // direction de marche
+                    omega: rand(-1, 1),                 // vitesse de virage
+                    vx: Math.cos(theta) * target,
+                    vy: Math.sin(theta) * target,
+                    target,                             // vitesse souhaitée
+                    retarget: rand(1.5, 6),             // délai avant de changer d'allure
+                    size: rand(CONFIG.sizeMin, CONFIG.sizeMax),
+                    sprite: sprites[Math.floor(Math.random() * sprites.length)],
+                    alpha: rand(0.55, 1)
+                };
+            }
+
+            function buildAll() {
+                panels.length = 0;
+                document.querySelectorAll(CONFIG.selector).forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const perimeter = 2 * (rect.width + rect.height);
+                    const n = Math.min(CONFIG.maxPerPanel, Math.max(10, Math.round(perimeter * density)));
+                    const parts = [];
+                    for (let i = 0; i < n; i++) parts.push(makeParticle(rect.width, rect.height));
+                    panels.push({ el, parts, motion: 1, w: rect.width, h: rect.height });
+                });
+            }
 
             function resize() {
                 dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -533,112 +626,93 @@
                 buildAll();
             }
 
-            // Sprites lumineux pré-rendus (rapide)
-            function makeSprite(r, g, b) {
-                const s = document.createElement('canvas');
-                s.width = s.height = 64;
-                const c = s.getContext('2d');
-                const grad = c.createRadialGradient(32, 32, 0, 32, 32, 32);
-                grad.addColorStop(0,    `rgba(${r},${g},${b},1)`);
-                grad.addColorStop(0.25, `rgba(${r},${g},${b},0.75)`);
-                grad.addColorStop(1,    `rgba(${r},${g},${b},0)`);
-                c.fillStyle = grad;
-                c.fillRect(0, 0, 64, 64);
-                return s;
-            }
-            const spriteCyan  = makeSprite(56, 189, 248);
-            const spriteWhite = makeSprite(230, 245, 255);
+            function updateParticle(p, hw, hh, dt) {
+                // Changement d'allure aléatoire (marche, flânerie, pause)
+                p.retarget -= dt;
+                if (p.retarget <= 0) {
+                    p.retarget = rand(1.5, 6);
+                    p.target = Math.random() < CONFIG.pauseChance ? 0 : rand(CONFIG.speedMin, CONFIG.speedMax);
+                }
 
-            // Position sur un rectangle arrondi (coordonnées locales), s = distance parcourue en px
-            function pointOnRoundedRect(w, h, r, s) {
-                r = Math.min(r, w / 2, h / 2);
-                const a = w - 2 * r;            // segments horizontaux
-                const b = h - 2 * r;            // segments verticaux
-                const q = Math.PI * r / 2;      // quart de cercle
-                const P = 2 * a + 2 * b + 4 * q;
-                s = ((s % P) + P) % P;
+                // Errance : la direction dérive de façon aléatoire et douce
+                p.omega += rand(-1, 1) * 2.5 * dt;
+                p.omega *= (1 - Math.min(1, dt * 0.8));
+                p.omega = Math.max(-1.6, Math.min(1.6, p.omega));
+                p.theta += p.omega * dt;
 
-                if (s < a) return [r + s, 0];
-                s -= a;
-                if (s < q) { const t = -Math.PI / 2 + s / r; return [w - r + Math.cos(t) * r, r + Math.sin(t) * r]; }
-                s -= q;
-                if (s < b) return [w, r + s];
-                s -= b;
-                if (s < q) { const t = s / r; return [w - r + Math.cos(t) * r, h - r + Math.sin(t) * r]; }
-                s -= q;
-                if (s < a) return [w - r - s, h];
-                s -= a;
-                if (s < q) { const t = Math.PI / 2 + s / r; return [r + Math.cos(t) * r, h - r + Math.sin(t) * r]; }
-                s -= q;
-                if (s < b) return [0, h - r - s];
-                s -= b;
-                { const t = Math.PI + s / r; return [r + Math.cos(t) * r, r + Math.sin(t) * r]; }
-            }
+                // Rester dans la zone d'aura : se détourner du cadre ou revenir vers lui
+                sdfRoundedRect(p.x - hw, p.y - hh, hw, hh, CONFIG.cornerRadius, tmp);
+                let steer = null;
+                if (tmp.d > CONFIG.zoneMax - 6) steer = Math.atan2(-tmp.ny, -tmp.nx);
+                else if (tmp.d < CONFIG.zoneMin + 5) steer = Math.atan2(tmp.ny, tmp.nx);
+                if (steer !== null) {
+                    p.theta += angDiff(steer, p.theta) * Math.min(1, dt * 3.2);
+                }
 
-            const rand = (min, max) => min + Math.random() * (max - min);
+                // Vitesse lissée vers la vitesse souhaitée
+                const dx = Math.cos(p.theta) * p.target;
+                const dy = Math.sin(p.theta) * p.target;
+                const k = Math.min(1, dt * 2.2);
+                p.vx += (dx - p.vx) * k;
+                p.vy += (dy - p.vy) * k;
 
-            // Un ensemble de satellites par cadre
-            const panels = [];
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
 
-            function buildAll() {
-                panels.length = 0;
-                document.querySelectorAll('.glass-panel').forEach(el => {
-                    const rect = el.getBoundingClientRect();
-                    const perimeter = 2 * (rect.width + rect.height);
-                    const n = Math.min(CONFIG.maxPerPanel, Math.max(12, Math.round(perimeter * density)));
-                    const parts = [];
-                    for (let i = 0; i < n; i++) {
-                        const dir = Math.random() < CONFIG.reverseRatio ? -1 : 1;
-                        parts.push({
-                            s:      Math.random() * perimeter,
-                            speed:  rand(CONFIG.speedMin, CONFIG.speedMax) * dir,
-                            dist:   rand(CONFIG.distMin, CONFIG.distMax),
-                            phase:  Math.random() * Math.PI * 2,
-                            freq:   rand(0.6, 1.8),
-                            size:   rand(CONFIG.sizeMin, CONFIG.sizeMax),
-                            sprite: Math.random() < CONFIG.cyanRatio ? spriteCyan : spriteWhite,
-                            alpha:  rand(0.55, 1)
-                        });
-                    }
-                    panels.push({ el, parts, basePerimeter: perimeter });
-                });
+                // Sécurité : ne jamais entrer dans le cadre ni trop s'en éloigner
+                sdfRoundedRect(p.x - hw, p.y - hh, hw, hh, CONFIG.cornerRadius, tmp);
+                if (tmp.d < CONFIG.zoneMin - 2) {
+                    const push = CONFIG.zoneMin - 2 - tmp.d;
+                    p.x += tmp.nx * push;
+                    p.y += tmp.ny * push;
+                } else if (tmp.d > CONFIG.zoneMax + 6) {
+                    const pull = tmp.d - (CONFIG.zoneMax + 6);
+                    p.x -= tmp.nx * pull;
+                    p.y -= tmp.ny * pull;
+                }
             }
 
             let last = performance.now();
-            let time = 0;
 
             function frame(now) {
                 requestAnimationFrame(frame);
                 const dt = Math.min((now - last) / 1000, 0.05);
                 last = now;
-                time += dt;
                 const speedFactor = reduced ? 0.15 : 1;
 
                 ctx.clearRect(0, 0, W, H);
                 ctx.globalCompositeOperation = 'lighter';
 
-                for (const p of panels) {
-                    const rect = p.el.getBoundingClientRect();   // inclut flottaison et tremblement
-                    if (rect.bottom < -60 || rect.top > H + 60 || rect.width === 0) continue;
+                for (const pn of panels) {
+                    const rect = pn.el.getBoundingClientRect();   // suit la flottaison et le tremblement
+                    if (rect.bottom < -80 || rect.top > H + 80 || rect.width === 0) continue;
 
-                    for (const part of p.parts) {
-                        part.s += part.speed * speedFactor * dt;
+                    // Au survol : les particules s'immobilisent (arrêt progressif), le cadre continue de trembler
+                    const hovered = pn.el.matches(':hover');
+                    pn.motion += ((hovered ? 0 : 1) - pn.motion) * Math.min(1, dt * 7);
+                    if (pn.motion < 0.002) pn.motion = 0;
 
-                        const d = part.dist + Math.sin(time * part.freq + part.phase) * CONFIG.wobble;
-                        const w = rect.width  + 2 * d;
-                        const h = rect.height + 2 * d;
-                        const r = CONFIG.cornerRadius + d;
-                        const ox = rect.left - d;
-                        const oy = rect.top  - d;
-                        const dir = part.speed >= 0 ? 1 : -1;
+                    const hw = pn.w / 2, hh = pn.h / 2;
+                    const step = dt * pn.motion * speedFactor;
 
-                        // Traînée (queue derrière la particule) puis tête
+                    for (const p of pn.parts) {
+                        if (step > 0) updateParticle(p, hw, hh, step);
+
+                        const sp = Math.hypot(p.vx, p.vy);
+                        const dirX = sp > 0.01 ? p.vx / sp : 0;
+                        const dirY = sp > 0.01 ? p.vy / sp : 0;
+                        const tailScale = Math.min(1, sp / 30) * pn.motion;
+
+                        // Position écran = position locale + coin du cadre
+                        const bx = rect.left + p.x;
+                        const by = rect.top  + p.y;
+
                         for (let k = CONFIG.tailLength; k >= 0; k--) {
-                            const [x, y] = pointOnRoundedRect(w, h, r, part.s - dir * k * CONFIG.tailSpacing);
+                            const off = k * CONFIG.tailSpacing * tailScale;
                             const fade = 1 - k / (CONFIG.tailLength + 1);
-                            const size = part.size * (0.35 + 0.65 * fade) * 3;   // le sprite inclut le halo
-                            ctx.globalAlpha = part.alpha * fade * fade;
-                            ctx.drawImage(part.sprite, ox + x - size / 2, oy + y - size / 2, size, size);
+                            const size = p.size * (0.4 + 0.6 * fade) * 3;
+                            ctx.globalAlpha = p.alpha * fade * fade;
+                            ctx.drawImage(p.sprite, bx - dirX * off - size / 2, by - dirY * off - size / 2, size, size);
                         }
                     }
                 }
@@ -648,7 +722,7 @@
             }
 
             window.addEventListener('resize', resize);
-            window.addEventListener('load', buildAll);   // recalcule une fois la mise en page finale chargée
+            window.addEventListener('load', buildAll);
             resize();
             requestAnimationFrame(frame);
         })();
