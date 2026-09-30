@@ -1,736 +1,275 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MECAPEX - Le Saut Quantique de la Mécanique Pure</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        @font-face {
-            font-family: 'ISO 3098';
-            src: url('https://cdn.jsdelivr.net/gh/openscad/osifont@master/osifont.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-
-        :root {
-            /* Hauteur commune aux 3 vidéos des articles (modifiable ici) */
-            --article-video-height: 140px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html {
-            width: 100%;
-            min-height: 100%;
-            background-color: #0b0f19;
-        }
-
-        body {
-            width: 100%;
-            min-height: 100vh;
-            overflow-x: hidden;
-            font-family: 'ISO 3098', 'Share Tech Mono', monospace, sans-serif;
-            color: #ffffff;
-            background: transparent;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        /* --- VIDÉO DE FOND --- */
-        .video-bg-container {
-            position: fixed;
-            inset: 0;
-            z-index: -2;
-            overflow: hidden;
-            pointer-events: none;
-            background: #05080f;
-        }
-
-        .video-bg-container video {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            transform: translate(-50%, -50%);
-            object-fit: cover;
-        }
-
-        /* --- CANVAS DES PARTICULES : ARRIÈRE-PLAN, DERRIÈRE LE TEXTE ET LES VIDÉOS --- */
-        #aura-canvas {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;              /* sous .app-container (z-index: 1) */
-            pointer-events: none;
-        }
-
-        .bg-overlay {
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(circle at center, rgba(11, 15, 25, 0.1) 25%, rgba(5, 8, 15, 0.6) 80%, rgba(0, 0, 0, 0.9) 100%);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* --- CONTENEUR PRINCIPAL --- */
-        .app-container {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            min-height: 100vh;
-            padding: 2% 4%;
-            gap: 20px;
-            align-items: stretch;
-        }
-
-        /* --- CADRES TRANSPARENTS --- */
-        .glass-panel {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
-            border-radius: 16px;
-            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .glass-panel:hover {
-            animation: shake 0.4s ease-in-out infinite alternate;
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.6);
-        }
-
-        /* Lueur neutre (blanche) sur les cadres centraux */
-        .hero-banner,
-        .info-card {
-            box-shadow:
-                0 8px 32px 0 rgba(0, 0, 0, 0.25),
-                0 0 22px 2px rgba(255, 25, 255, 0.08);
-        }
-
-        .hero-banner:hover,
-        .info-card:hover {
-            box-shadow:
-                0 8px 32px 0 rgba(0, 0, 0, 0.25),
-                0 0 34px 4px rgba(255, 25, 255, 0.16);
-        }
-
-        .glass-panel h1, .glass-panel h2, .glass-panel p, .glass-panel span, .glass-panel li {
-            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
-        }
-
-        @keyframes shake {
-            0%   { transform: translate(0, 0) rotate(0deg); }
-            25%  { transform: translate(-2px, 1px) rotate(-0.5deg); }
-            50%  { transform: translate(2px, -1px) rotate(0.5deg); }
-            75%  { transform: translate(-1px, -1px) rotate(-0.3deg); }
-            100% { transform: translate(1px, 1px) rotate(0.3deg); }
-        }
-
-        /* --- FLOTTAISON --- */
-        .floating-window-1 { animation: floatSoft1 10s ease-in-out infinite alternate; }
-        .floating-window-2 { animation: floatSoft2 13s ease-in-out infinite alternate; }
-
-        .floating-window-1:hover,
-        .floating-window-2:hover {
-            animation: shake 0.4s ease-in-out infinite alternate;
-        }
-
-        @keyframes floatSoft1 {
-            0%   { transform: translateY(0); }
-            50%  { transform: translateY(-14px); }
-            100% { transform: translateY(10px); }
-        }
-
-        @keyframes floatSoft2 {
-            0%   { transform: translateY(0); }
-            50%  { transform: translateY(14px); }
-            100% { transform: translateY(-10px); }
-        }
-
-        /* --- MENU LATÉRAL --- */
-        .sidebar-nav {
-            width: 65px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 0;
-            gap: 18px;
-            z-index: 10;
-        }
-
-        .brand-logo {
-            font-size: 20px;
-            color: #38bdf8;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
-        }
-
-        .nav-link {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-link:hover, .nav-link.active {
-            color: #ffffff;
-            background: rgba(56, 189, 248, 0.25);
-            border-color: rgba(56, 189, 248, 0.6);
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
-        }
-
-        /* --- CONTENU PRINCIPAL --- */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        /* --- CADRE HERO : TEXTE À GAUCHE / VIDÉO À DROITE --- */
-        .hero-banner {
-            padding: 25px 30px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 30px;
-        }
-
-        .hero-text {
-            flex: 1;
-            min-width: 0;
-        }
-
-        /* Vidéo du hero : même hauteur que les vidéos des cartes, l'excédent est tronqué (recadrage centré) */
-        .hero-video-wrap {
-            flex: 0 0 28%;
-            height: var(--article-video-height);
-            overflow: hidden;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: rgba(0, 0, 0, 0.3);
-            position: relative;
-        }
-
-        .hero-video-wrap video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            display: block;
-        }
-
-        .tag-category {
-            font-size: 12px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: #38bdf8;
-            margin-bottom: 8px;
-            display: inline-block;
-        }
-
-        .hero-title {
-            font-size: 22px;
-            line-height: 1.3;
-            font-weight: normal;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .hero-description {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.9);
-            max-width: 650px;
-            line-height: 1.4;
-        }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .info-card {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 200px;
-        }
-
-        .card-title {
-            font-size: 16px;
-            font-weight: normal;
-            margin-bottom: 8px;
-            line-height: 1.3;
-            text-transform: uppercase;
-        }
-
-        .card-desc {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.85);
-        }
-
-        .card-video {
-            width: 100%;
-            height: var(--article-video-height);
-            border-radius: 10px;
-            object-fit: cover;
-            object-position: center;
-            margin-top: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: rgba(0, 0, 0, 0.3);
-            display: block;
-        }
-
-        /* --- PANNEAU DROIT --- */
-        .side-panel {
-            width: 300px;
-            padding: 25px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        .panel-header {
-            font-size: 14px;
-            font-weight: normal;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            padding-bottom: 10px;
-            color: #f0f9ff;
-        }
-
-        .status-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .status-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .status-name {
-            font-size: 13px;
-            text-transform: uppercase;
-        }
-
-        .status-badge {
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 12px;
-            text-transform: uppercase;
-        }
-
-        .badge-active {
-            background: rgba(34, 197, 94, 0.2);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.4);
-        }
-
-        .badge-pending {
-            background: rgba(234, 179, 8, 0.2);
-            color: #facc15;
-            border: 1px solid rgba(234, 179, 8, 0.4);
-        }
-
-        /* --- RESPONSIVE --- */
-        @media (max-width: 1024px) {
-            .app-container { flex-direction: column; }
-            .sidebar-nav {
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                justify-content: center;
-            }
-            .side-panel { width: 100%; }
-        }
-
-        /* Sur petit écran : texte au-dessus, vidéo en dessous (même hauteur conservée) */
-        @media (max-width: 700px) {
-            .hero-banner {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .hero-video-wrap {
-                flex: none;
-                width: 100%;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .floating-window-1, .floating-window-2, .glass-panel:hover {
-                animation: none;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MECAPEX - Le Saut Quantique de la Mécanique Pure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+@font-face{font-family:'ISO 3098';src:url('https://cdn.jsdelivr.net/gh/openscad/osifont@master/osifont.ttf') format('truetype');font-weight:normal;font-style:normal}
+:root{--article-video-height:140px}
+*{box-sizing:border-box;margin:0;padding:0}
+html{width:100%;min-height:100%;background-color:#0b0f19}
+body{width:100%;min-height:100vh;overflow-x:hidden;font-family:'ISO 3098','Share Tech Mono',monospace,sans-serif;color:#fff;background:transparent;font-size:14px;line-height:1.4}
+.video-bg-container{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none;background:#05080f}
+.video-bg-container video{position:absolute;top:50%;left:50%;min-width:100%;min-height:100%;width:auto;height:auto;transform:translate(-50%,-50%);object-fit:cover}
+.bg-overlay{position:fixed;inset:0;background:radial-gradient(circle at center,rgba(11,15,25,.1) 25%,rgba(5,8,15,.6) 80%,rgba(0,0,0,.9) 100%);z-index:-1;pointer-events:none}
+/* LOGO : fixe, en haut à gauche, arrière-plan, 30px de haut */
+.site-logo{position:fixed;top:10px;left:14px;height:30px;width:auto;z-index:0;pointer-events:none}
+#aura-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.app-container{position:relative;z-index:1;display:flex;min-height:100vh;padding:2% 4%;gap:20px;align-items:stretch}
+.glass-panel{background:transparent;border:1px solid rgba(255,255,255,.35);box-shadow:0 8px 32px 0 rgba(0,0,0,.25);border-radius:16px;transition:background .3s ease,border-color .3s ease,box-shadow .3s ease}
+.glass-panel:hover{animation:shake .4s ease-in-out infinite alternate;background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.6)}
+.hero-banner,.info-card{box-shadow:0 8px 32px 0 rgba(0,0,0,.25),0 0 22px 2px rgba(255,25,255,.08)}
+.hero-banner:hover,.info-card:hover{box-shadow:0 8px 32px 0 rgba(0,0,0,.25),0 0 34px 4px rgba(255,25,255,.16)}
+.glass-panel h1,.glass-panel h2,.glass-panel p,.glass-panel span,.glass-panel li{text-shadow:0 2px 6px rgba(0,0,0,.9)}
+@keyframes shake{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(-2px,1px) rotate(-.5deg)}50%{transform:translate(2px,-1px) rotate(.5deg)}75%{transform:translate(-1px,-1px) rotate(-.3deg)}100%{transform:translate(1px,1px) rotate(.3deg)}}
+.floating-window-1{animation:floatSoft1 10s ease-in-out infinite alternate}
+.floating-window-2{animation:floatSoft2 13s ease-in-out infinite alternate}
+.floating-window-1:hover,.floating-window-2:hover{animation:shake .4s ease-in-out infinite alternate}
+@keyframes floatSoft1{0%{transform:translateY(0)}50%{transform:translateY(-14px)}100%{transform:translateY(10px)}}
+@keyframes floatSoft2{0%{transform:translateY(0)}50%{transform:translateY(14px)}100%{transform:translateY(-10px)}}
+.sidebar-nav{width:65px;display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:18px;z-index:10}
+.brand-logo{font-size:20px;color:#38bdf8;margin-bottom:10px;text-shadow:0 0 10px rgba(56,189,248,.6)}
+.nav-link{width:40px;height:40px;border-radius:10px;display:flex;justify-content:center;align-items:center;color:rgba(255,255,255,.7);text-decoration:none;font-size:15px;transition:all .3s ease;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}
+.nav-link:hover,.nav-link.active{color:#fff;background:rgba(56,189,248,.25);border-color:rgba(56,189,248,.6);box-shadow:0 0 12px rgba(56,189,248,.4)}
+.main-content{flex:1;display:flex;flex-direction:column;gap:20px}
+.hero-banner{padding:25px 30px;position:relative;overflow:hidden;display:flex;flex-direction:row;align-items:center;gap:30px}
+.hero-text{flex:1;min-width:0}
+.hero-video-wrap{flex:0 0 28%;height:var(--article-video-height);overflow:hidden;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.3);position:relative}
+.hero-video-wrap video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.tag-category{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#38bdf8;margin-bottom:8px;display:inline-block}
+.hero-title{font-size:22px;line-height:1.3;font-weight:normal;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.hero-description{font-size:14px;color:rgba(255,255,255,.9);max-width:650px;line-height:1.4}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.info-card{padding:20px;display:flex;flex-direction:column;justify-content:space-between;min-height:200px}
+.card-title{font-size:16px;font-weight:normal;margin-bottom:8px;line-height:1.3;text-transform:uppercase}
+.card-desc{font-size:13px;color:rgba(255,255,255,.85)}
+.card-video{width:100%;height:var(--article-video-height);border-radius:10px;object-fit:cover;object-position:center;margin-top:12px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.3);display:block}
+.side-panel{width:300px;padding:25px 20px;display:flex;flex-direction:column;gap:18px}
+.panel-header{font-size:14px;font-weight:normal;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:10px;color:#f0f9ff}
+.status-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.status-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:8px;border:1px solid rgba(255,255,255,.08)}
+.status-name{font-size:13px;text-transform:uppercase}
+.status-badge{font-size:11px;padding:3px 8px;border-radius:12px;text-transform:uppercase}
+.badge-active{background:rgba(34,197,94,.2);color:#4ade80;border:1px solid rgba(34,197,94,.4)}
+.badge-pending{background:rgba(234,179,8,.2);color:#facc15;border:1px solid rgba(234,179,8,.4)}
+@media (max-width:1024px){.app-container{flex-direction:column}.sidebar-nav{width:100%;height:auto;flex-direction:row;justify-content:center}.side-panel{width:100%}}
+@media (max-width:700px){.hero-banner{flex-direction:column;align-items:stretch}.hero-video-wrap{flex:none;width:100%}}
+@media (prefers-reduced-motion:reduce){.floating-window-1,.floating-window-2,.glass-panel:hover{animation:none}}
+</style>
 </head>
 <body>
 
-    <!-- VIDÉO DE FOND -->
-    <div class="video-bg-container">
-        <video id="bgVideo" autoplay muted loop playsinline preload="auto">
-            <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790797980/0001-boomerang.mp4" type="video/mp4">
-            <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790797980/0001-boomerang.webm" type="video/webm">
-        </video>
-    </div>
+<div class="video-bg-container">
+<video id="bgVideo" autoplay muted loop playsinline preload="auto">
+<source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790797980/0001-boomerang.mp4" type="video/mp4">
+<source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790797980/0001-boomerang.webm" type="video/webm">
+</video>
+</div>
+<div class="bg-overlay"></div>
 
-    <div class="bg-overlay"></div>
+<!-- LOGO MECAPEX (fichier logo-mecapex.svg placé à côté de index.html) -->
+<img class="site-logo" src="logo-mecapex.svg" alt="MECAPEX">
 
-    <!-- PARTICULES (arrière-plan, derrière le texte et les vidéos) -->
-    <canvas id="aura-canvas"></canvas>
+<canvas id="aura-canvas"></canvas>
 
-    <div class="app-container">
+<div class="app-container">
 
-        <nav class="sidebar-nav glass-panel floating-window-1">
-            <div class="brand-logo"><i class="fa-solid fa-bolt"></i></div>
-            <a href="index.html" class="nav-link active" title="Accueil"><i class="fa-solid fa-house"></i></a>
-            <a href="articles.html" class="nav-link" title="Articles"><i class="fa-solid fa-newspaper"></i></a>
-            <a href="projets.html" class="nav-link" title="Projets"><i class="fa-solid fa-cube"></i></a>
-            <a href="stats.html" class="nav-link" title="Statistiques"><i class="fa-solid fa-chart-line"></i></a>
-            <a href="equipe.html" class="nav-link" title="Équipe"><i class="fa-solid fa-user-group"></i></a>
-            <a href="parametres.html" class="nav-link" title="Paramètres"><i class="fa-solid fa-gear"></i></a>
-        </nav>
+<nav class="sidebar-nav glass-panel floating-window-1">
+<div class="brand-logo"><i class="fa-solid fa-bolt"></i></div>
+<a href="index.html" class="nav-link active" title="Accueil"><i class="fa-solid fa-house"></i></a>
+<a href="articles.html" class="nav-link" title="Articles"><i class="fa-solid fa-newspaper"></i></a>
+<a href="projets.html" class="nav-link" title="Projets"><i class="fa-solid fa-cube"></i></a>
+<a href="stats.html" class="nav-link" title="Statistiques"><i class="fa-solid fa-chart-line"></i></a>
+<a href="equipe.html" class="nav-link" title="Équipe"><i class="fa-solid fa-user-group"></i></a>
+<a href="parametres.html" class="nav-link" title="Paramètres"><i class="fa-solid fa-gear"></i></a>
+</nav>
 
-        <main class="main-content">
+<main class="main-content">
+<section class="hero-banner glass-panel floating-window-1">
+<div class="hero-text">
+<span class="tag-category">ARTICLE EXCLUSIF</span>
+<h1 class="hero-title">Le saut quantique de la mécanique pure</h1>
+<p class="hero-description">Micro-assemblage robotisé exploitant une lévitation magnétique haute fréquence et une cinématique de nouvelle génération.</p>
+</div>
+<div class="hero-video-wrap">
+<video autoplay muted loop playsinline preload="auto"><source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790764420/20002-reverse-boomerang.mp4" type="video/mp4"></video>
+</div>
+</section>
 
-            <section class="hero-banner glass-panel floating-window-1">
-                <div class="hero-text">
-                    <span class="tag-category">ARTICLE EXCLUSIF</span>
-                    <h1 class="hero-title">Le saut quantique de la mécanique pure</h1>
-                    <p class="hero-description">
-                        Micro-assemblage robotisé exploitant une lévitation magnétique haute fréquence et une cinématique de nouvelle génération.
-                    </p>
-                </div>
-                <div class="hero-video-wrap">
-                    <video autoplay muted loop playsinline preload="auto">
-                        <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790764420/20002-reverse-boomerang.mp4" type="video/mp4">
-                    </video>
-                </div>
-            </section>
+<div class="cards-grid">
+<article class="info-card glass-panel floating-window-2">
+<div>
+<span class="tag-category">MOBILITÉ</span>
+<h2 class="card-title">Véhicules de concept sans carénage</h2>
+<p class="card-desc">Prototypage rapide à turbine intégrée.</p>
+</div>
+<video class="card-video" autoplay muted loop playsinline preload="auto"><source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790712606/istockphoto-2205951073-640_adpp_is.mp4" type="video/mp4"></video>
+</article>
+<article class="info-card glass-panel floating-window-1">
+<div>
+<span class="tag-category">PROPULSION</span>
+<h2 class="card-title">Turbines dynamiques à états gazeux</h2>
+<p class="card-desc">Flux thermiques optimisés par IA.</p>
+</div>
+<video class="card-video" autoplay muted loop playsinline preload="auto"><source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790764639/1003-boomerang.mp4" type="video/mp4"></video>
+</article>
+</div>
+</main>
 
-            <div class="cards-grid">
+<aside class="side-panel glass-panel floating-window-2">
+<h2 class="panel-header">Prototypes en Développement</h2>
+<ul class="status-list">
+<li class="status-item"><span class="status-name">Prototype 1</span><span class="status-badge badge-active">opérationnel</span></li>
+<li class="status-item"><span class="status-name">Prototype 2</span><span class="status-badge badge-active">en test</span></li>
+<li class="status-item"><span class="status-name">Prototype 3</span><span class="status-badge badge-pending">en attente</span></li>
+<li class="status-item"><span class="status-name">Prototype 4</span><span class="status-badge badge-pending">conception</span></li>
+</ul>
+</aside>
 
-                <article class="info-card glass-panel floating-window-2">
-                    <div>
-                        <span class="tag-category">MOBILITÉ</span>
-                        <h2 class="card-title">Véhicules de concept sans carénage</h2>
-                        <p class="card-desc">Prototypage rapide à turbine intégrée.</p>
-                    </div>
-                    <video class="card-video" autoplay muted loop playsinline preload="auto">
-                        <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790712606/istockphoto-2205951073-640_adpp_is.mp4" type="video/mp4">
-                    </video>
-                </article>
+</div>
 
-                <article class="info-card glass-panel floating-window-1">
-                    <div>
-                        <span class="tag-category">PROPULSION</span>
-                        <h2 class="card-title">Turbines dynamiques à états gazeux</h2>
-                        <p class="card-desc">Flux thermiques optimisés par IA.</p>
-                    </div>
-                    <video class="card-video" autoplay muted loop playsinline preload="auto">
-                        <source src="https://res.cloudinary.com/ljye26cz/video/upload/v1790764639/1003-boomerang.mp4" type="video/mp4">
-                    </video>
-                </article>
+<script>
+// Lecture forcée de toutes les vidéos
+document.querySelectorAll('video').forEach(v=>{
+  v.muted=true;
+  v.play().catch(()=>{['click','touchstart','scroll'].forEach(evt=>window.addEventListener(evt,()=>v.play(),{once:true}));});
+});
 
-            </div>
+// Particules bleues (bleu du logo) dans la bande des 10 % du bord intérieur des cadres centraux
+(function(){
+  const CONFIG={
+    selector:'.hero-banner, .info-card',
+    perPanel:50, bandRatio:0.10, edgeInset:4,
+    speedMin:8.4, speedMax:67.2, pauseChance:0.18, turnFactor:0.9, verticalFactor:0.55,
+    sizeMin:3.5, sizeMax:8.4,          // plus grosses (avant 1.75 / 4.2)
+    cornerRadius:16
+  };
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canvas=document.getElementById('aura-canvas');
+  const ctx=canvas.getContext('2d');
+  let W=0,H=0,dpr=1;
 
-        </main>
+  // Sprite unique : bleu du logo #1b5faa = rgb(27,95,170)
+  const sprites=[(()=>{
+    const s=document.createElement('canvas'); s.width=s.height=64;
+    const c=s.getContext('2d');
+    const grad=c.createRadialGradient(32,32,0,32,32,32);
+    grad.addColorStop(0,'rgba(27,95,170,1)');
+    grad.addColorStop(0.25,'rgba(27,95,170,0.75)');
+    grad.addColorStop(1,'rgba(27,95,170,0)');
+    c.fillStyle=grad; c.fillRect(0,0,64,64);
+    return s;
+  })()];
 
-        <aside class="side-panel glass-panel floating-window-2">
-            <h2 class="panel-header">Prototypes en Développement</h2>
-            <ul class="status-list">
-                <li class="status-item">
-                    <span class="status-name">Prototype 1</span>
-                    <span class="status-badge badge-active">opérationnel</span>
-                </li>
-                <li class="status-item">
-                    <span class="status-name">Prototype 2</span>
-                    <span class="status-badge badge-active">en test</span>
-                </li>
-                <li class="status-item">
-                    <span class="status-name">Prototype 3</span>
-                    <span class="status-badge badge-pending">en attente</span>
-                </li>
-                <li class="status-item">
-                    <span class="status-name">Prototype 4</span>
-                    <span class="status-badge badge-pending">conception</span>
-                </li>
-            </ul>
-        </aside>
+  const rand=(min,max)=>min+Math.random()*(max-min);
+  const angDiff=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 
-    </div>
+  function sdfRoundedRect(px,py,hw,hh,r,out){
+    const qx=Math.abs(px)-(hw-r), qy=Math.abs(py)-(hh-r);
+    const ox=Math.max(qx,0), oy=Math.max(qy,0), len=Math.hypot(ox,oy);
+    out.d=len+Math.min(Math.max(qx,qy),0)-r;
+    const sx=px<0?-1:1, sy=py<0?-1:1;
+    if(len>0){out.nx=sx*ox/len;out.ny=sy*oy/len;}
+    else if(qx>qy){out.nx=sx;out.ny=0;}
+    else{out.nx=0;out.ny=sy;}
+  }
 
-    <script>
-        // ===== LECTURE FORCÉE DE TOUTES LES VIDÉOS =====
-        const videos = document.querySelectorAll('video');
-        videos.forEach(v => {
-            v.muted = true;
-            v.play().catch(() => {
-                ['click', 'touchstart', 'scroll'].forEach(evt =>
-                    window.addEventListener(evt, () => v.play(), { once: true })
-                );
-            });
-        });
+  const outer={d:0,nx:0,ny:0}, inner={d:0,nx:0,ny:0}, panels=[];
 
-        // ===== PARTICULES GRIS CLAIR : BANDE DES 10 % DU BORD INTÉRIEUR DES CADRES CENTRAUX =====
-        (function () {
+  function isAllowed(x,y,pn){
+    sdfRoundedRect(x-pn.hw,y-pn.hh,pn.hw,pn.hh,CONFIG.cornerRadius,outer);
+    if(outer.d>-CONFIG.edgeInset) return false;
+    sdfRoundedRect(x-pn.hw,y-pn.hh,pn.ihx,pn.ihy,0,inner);
+    return inner.d>=0;
+  }
 
-            // --- Réglages ---
-            const CONFIG = {
-                selector:       '.hero-banner, .info-card',  // uniquement les cadres centraux
-                perPanel:       50,      // nombre de particules par cadre
-                bandRatio:      0.10,    // épaisseur de la bande de navigation : 10 % de la largeur / hauteur du cadre
-                edgeInset:      4,       // marge minimale avec le bord réel du cadre (px)
-                speedMin:       8.4,     // vitesse minimale (px/s)
-                speedMax:       67.2,    // vitesse maximale (px/s)
-                pauseChance:    0.18,    // probabilité de s'arrêter un instant
-                turnFactor:     0.9,     // amplitude des virages
-                verticalFactor: 0.55,    // amplitude du mouvement en hauteur (1 = normal)
-                sizeMin:        1.75,    // taille minimale (px)
-                sizeMax:        4.2,     // taille maximale (px)
-                cornerRadius:   16       // rayon des coins (doit suivre le CSS)
-            };
+  function makeParticle(pn){
+    let x=pn.hw,y=pn.hh,ok=false;
+    for(let t=0;t<80&&!ok;t++){x=rand(0,pn.w);y=rand(0,pn.h);ok=isAllowed(x,y,pn);}
+    if(!ok){x=pn.w*0.05;y=pn.hh;}
+    const theta=rand(0,Math.PI*2);
+    const target=Math.random()<CONFIG.pauseChance?0:rand(CONFIG.speedMin,CONFIG.speedMax);
+    return{x,y,theta,omega:rand(-1,1)*CONFIG.turnFactor,vx:Math.cos(theta)*target,vy:Math.sin(theta)*target,target,
+      retarget:rand(1.5,6),size:rand(CONFIG.sizeMin,CONFIG.sizeMax),
+      sprite:sprites[Math.floor(Math.random()*sprites.length)],alpha:rand(0.65,1)};
+  }
 
-            const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function buildAll(){
+    panels.length=0;
+    document.querySelectorAll(CONFIG.selector).forEach(el=>{
+      const rect=el.getBoundingClientRect(), w=rect.width, h=rect.height;
+      const pn={el,w,h,hw:w/2,hh:h/2,ihx:w/2-w*CONFIG.bandRatio,ihy:h/2-h*CONFIG.bandRatio,motion:1,parts:[]};
+      for(let i=0;i<CONFIG.perPanel;i++) pn.parts.push(makeParticle(pn));
+      panels.push(pn);
+    });
+  }
 
-            const canvas = document.getElementById('aura-canvas');
-            const ctx = canvas.getContext('2d');
-            let W = 0, H = 0, dpr = 1;
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    W=window.innerWidth; H=window.innerHeight;
+    canvas.width=W*dpr; canvas.height=H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    buildAll();
+  }
 
-            // Sprites en nuances de gris clair (aucune couleur)
-            const GRAYS = [165, 180, 194, 208, 222, 236];
-            const sprites = GRAYS.map(g => {
-                const s = document.createElement('canvas');
-                s.width = s.height = 64;
-                const c = s.getContext('2d');
-                const grad = c.createRadialGradient(32, 32, 0, 32, 32, 32);
-                grad.addColorStop(0,    `rgba(${g},${g},${g},1)`);
-                grad.addColorStop(0.25, `rgba(${g},${g},${g},0.75)`);
-                grad.addColorStop(1,    `rgba(${g},${g},${g},0)`);
-                c.fillStyle = grad;
-                c.fillRect(0, 0, 64, 64);
-                return s;
-            });
+  function updateParticle(p,pn,dt){
+    p.retarget-=dt;
+    if(p.retarget<=0){p.retarget=rand(1.5,6);p.target=Math.random()<CONFIG.pauseChance?0:rand(CONFIG.speedMin,CONFIG.speedMax);}
+    const maxTurn=1.6*CONFIG.turnFactor;
+    p.omega+=rand(-1,1)*2.5*CONFIG.turnFactor*dt;
+    p.omega*=(1-Math.min(1,dt*0.8));
+    p.omega=Math.max(-maxTurn,Math.min(maxTurn,p.omega));
+    p.theta+=p.omega*dt;
+    const px=p.x-pn.hw, py=p.y-pn.hh;
+    sdfRoundedRect(px,py,pn.ihx,pn.ihy,0,inner);
+    sdfRoundedRect(px,py,pn.hw,pn.hh,CONFIG.cornerRadius,outer);
+    let steer=null;
+    if(inner.d<3) steer=Math.atan2(inner.ny,inner.nx);
+    else if(outer.d>-CONFIG.edgeInset-3) steer=Math.atan2(-outer.ny,-outer.nx);
+    if(steer!==null) p.theta+=angDiff(steer,p.theta)*Math.min(1,dt*5);
+    const dx=Math.cos(p.theta)*p.target, dy=Math.sin(p.theta)*p.target, k=Math.min(1,dt*2.2);
+    p.vx+=(dx-p.vx)*k; p.vy+=(dy-p.vy)*k;
+    p.x+=p.vx*dt; p.y+=p.vy*CONFIG.verticalFactor*dt;
+    sdfRoundedRect(p.x-pn.hw,p.y-pn.hh,pn.hw,pn.hh,CONFIG.cornerRadius,outer);
+    if(outer.d>-CONFIG.edgeInset){const pull=outer.d+CONFIG.edgeInset;p.x-=outer.nx*pull;p.y-=outer.ny*pull;}
+    sdfRoundedRect(p.x-pn.hw,p.y-pn.hh,pn.ihx,pn.ihy,0,inner);
+    if(inner.d<0){p.x+=inner.nx*-inner.d;p.y+=inner.ny*-inner.d;}
+  }
 
-            const rand = (min, max) => min + Math.random() * (max - min);
-            const angDiff = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
+  let last=performance.now();
+  function frame(now){
+    requestAnimationFrame(frame);
+    const dt=Math.min((now-last)/1000,0.05); last=now;
+    const speedFactor=reduced?0.15:1;
+    ctx.clearRect(0,0,W,H);
+    ctx.globalCompositeOperation='source-over';
+    for(const pn of panels){
+      const rect=pn.el.getBoundingClientRect();
+      if(rect.bottom<-80||rect.top>H+80||rect.width===0) continue;
+      const hovered=pn.el.matches(':hover');
+      pn.motion+=((hovered?0:1)-pn.motion)*Math.min(1,dt*7);
+      if(pn.motion<0.002) pn.motion=0;
+      const step=dt*pn.motion*speedFactor;
+      for(const p of pn.parts){
+        if(step>0) updateParticle(p,pn,step);
+        const size=p.size*3;
+        ctx.globalAlpha=p.alpha;
+        ctx.drawImage(p.sprite,rect.left+p.x-size/2,rect.top+p.y-size/2,size,size);
+      }
+    }
+    ctx.globalAlpha=1;
+  }
 
-            // Distance signée à un rectangle (arrondi si r > 0) + normale sortante
-            // (coordonnées relatives au centre ; d < 0 = à l'intérieur)
-            function sdfRoundedRect(px, py, hw, hh, r, out) {
-                const qx = Math.abs(px) - (hw - r);
-                const qy = Math.abs(py) - (hh - r);
-                const ox = Math.max(qx, 0);
-                const oy = Math.max(qy, 0);
-                const len = Math.hypot(ox, oy);
-                out.d = len + Math.min(Math.max(qx, qy), 0) - r;
-
-                const sx = px < 0 ? -1 : 1;
-                const sy = py < 0 ? -1 : 1;
-                if (len > 0) {
-                    out.nx = sx * ox / len;
-                    out.ny = sy * oy / len;
-                } else if (qx > qy) {
-                    out.nx = sx; out.ny = 0;
-                } else {
-                    out.nx = 0; out.ny = sy;
-                }
-            }
-
-            const outer = { d: 0, nx: 0, ny: 0 };   // bord réel du cadre
-            const inner = { d: 0, nx: 0, ny: 0 };   // zone centrale interdite (au-delà des 10 %)
-            const panels = [];
-
-            // Une particule est valide si elle est dans le cadre (avec marge) et hors de la zone centrale
-            function isAllowed(x, y, pn) {
-                sdfRoundedRect(x - pn.hw, y - pn.hh, pn.hw, pn.hh, CONFIG.cornerRadius, outer);
-                if (outer.d > -CONFIG.edgeInset) return false;
-                sdfRoundedRect(x - pn.hw, y - pn.hh, pn.ihx, pn.ihy, 0, inner);
-                return inner.d >= 0;
-            }
-
-            function makeParticle(pn) {
-                let x = pn.hw, y = pn.hh, ok = false;
-                for (let t = 0; t < 80 && !ok; t++) {
-                    x = rand(0, pn.w);
-                    y = rand(0, pn.h);
-                    ok = isAllowed(x, y, pn);
-                }
-                if (!ok) { x = pn.w * 0.05; y = pn.hh; }
-
-                const theta = rand(0, Math.PI * 2);
-                const target = Math.random() < CONFIG.pauseChance ? 0 : rand(CONFIG.speedMin, CONFIG.speedMax);
-                return {
-                    x, y,
-                    theta,                              // direction de marche
-                    omega: rand(-1, 1) * CONFIG.turnFactor,
-                    vx: Math.cos(theta) * target,
-                    vy: Math.sin(theta) * target,
-                    target,                             // vitesse souhaitée
-                    retarget: rand(1.5, 6),             // délai avant de changer d'allure
-                    size: rand(CONFIG.sizeMin, CONFIG.sizeMax),
-                    sprite: sprites[Math.floor(Math.random() * sprites.length)],
-                    alpha: rand(0.65, 1)
-                };
-            }
-
-            function buildAll() {
-                panels.length = 0;
-                document.querySelectorAll(CONFIG.selector).forEach(el => {
-                    const rect = el.getBoundingClientRect();
-                    const w = rect.width, h = rect.height;
-                    const bandX = w * CONFIG.bandRatio;   // 10 % de la largeur
-                    const bandY = h * CONFIG.bandRatio;   // 10 % de la hauteur
-                    const pn = {
-                        el, w, h,
-                        hw: w / 2, hh: h / 2,
-                        ihx: w / 2 - bandX,               // demi-largeur de la zone centrale interdite
-                        ihy: h / 2 - bandY,               // demi-hauteur de la zone centrale interdite
-                        motion: 1,
-                        parts: []
-                    };
-                    for (let i = 0; i < CONFIG.perPanel; i++) pn.parts.push(makeParticle(pn));
-                    panels.push(pn);
-                });
-            }
-
-            function resize() {
-                dpr = Math.min(window.devicePixelRatio || 1, 2);
-                W = window.innerWidth;
-                H = window.innerHeight;
-                canvas.width = W * dpr;
-                canvas.height = H * dpr;
-                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                buildAll();
-            }
-
-            function updateParticle(p, pn, dt) {
-                // Changement d'allure aléatoire (marche, flânerie, pause)
-                p.retarget -= dt;
-                if (p.retarget <= 0) {
-                    p.retarget = rand(1.5, 6);
-                    p.target = Math.random() < CONFIG.pauseChance ? 0 : rand(CONFIG.speedMin, CONFIG.speedMax);
-                }
-
-                // Errance : la direction dérive de façon aléatoire et douce
-                const maxTurn = 1.6 * CONFIG.turnFactor;
-                p.omega += rand(-1, 1) * 2.5 * CONFIG.turnFactor * dt;
-                p.omega *= (1 - Math.min(1, dt * 0.8));
-                p.omega = Math.max(-maxTurn, Math.min(maxTurn, p.omega));
-                p.theta += p.omega * dt;
-
-                // Rester dans la bande : se détourner de la zone centrale ou du bord du cadre
-                const px = p.x - pn.hw, py = p.y - pn.hh;
-                sdfRoundedRect(px, py, pn.ihx, pn.ihy, 0, inner);
-                sdfRoundedRect(px, py, pn.hw, pn.hh, CONFIG.cornerRadius, outer);
-                let steer = null;
-                if (inner.d < 3) steer = Math.atan2(inner.ny, inner.nx);                    // s'éloigner du centre du cadre
-                else if (outer.d > -CONFIG.edgeInset - 3) steer = Math.atan2(-outer.ny, -outer.nx);  // s'éloigner du bord
-                if (steer !== null) {
-                    p.theta += angDiff(steer, p.theta) * Math.min(1, dt * 5);
-                }
-
-                // Vitesse lissée vers la vitesse souhaitée
-                const dx = Math.cos(p.theta) * p.target;
-                const dy = Math.sin(p.theta) * p.target;
-                const k = Math.min(1, dt * 2.2);
-                p.vx += (dx - p.vx) * k;
-                p.vy += (dy - p.vy) * k;
-
-                p.x += p.vx * dt;
-                p.y += p.vy * CONFIG.verticalFactor * dt;
-
-                // Sécurité : rester dans le cadre puis hors de la zone centrale
-                sdfRoundedRect(p.x - pn.hw, p.y - pn.hh, pn.hw, pn.hh, CONFIG.cornerRadius, outer);
-                if (outer.d > -CONFIG.edgeInset) {
-                    const pull = outer.d + CONFIG.edgeInset;
-                    p.x -= outer.nx * pull;
-                    p.y -= outer.ny * pull;
-                }
-                sdfRoundedRect(p.x - pn.hw, p.y - pn.hh, pn.ihx, pn.ihy, 0, inner);
-                if (inner.d < 0) {
-                    p.x += inner.nx * -inner.d;
-                    p.y += inner.ny * -inner.d;
-                }
-            }
-
-            let last = performance.now();
-
-            function frame(now) {
-                requestAnimationFrame(frame);
-                const dt = Math.min((now - last) / 1000, 0.05);
-                last = now;
-                const speedFactor = reduced ? 0.15 : 1;
-
-                ctx.clearRect(0, 0, W, H);
-                ctx.globalCompositeOperation = 'source-over';
-
-                for (const pn of panels) {
-                    const rect = pn.el.getBoundingClientRect();   // suit la flottaison et le tremblement
-                    if (rect.bottom < -80 || rect.top > H + 80 || rect.width === 0) continue;
-
-                    // Au survol : les particules s'immobilisent (arrêt progressif), le cadre continue de trembler
-                    const hovered = pn.el.matches(':hover');
-                    pn.motion += ((hovered ? 0 : 1) - pn.motion) * Math.min(1, dt * 7);
-                    if (pn.motion < 0.002) pn.motion = 0;
-
-                    const step = dt * pn.motion * speedFactor;
-
-                    for (const p of pn.parts) {
-                        if (step > 0) updateParticle(p, pn, step);
-
-                        const size = p.size * 3;   // le sprite inclut son halo
-                        ctx.globalAlpha = p.alpha;
-                        ctx.drawImage(p.sprite, rect.left + p.x - size / 2, rect.top + p.y - size / 2, size, size);
-                    }
-                }
-
-                ctx.globalAlpha = 1;
-            }
-
-            window.addEventListener('resize', resize);
-            window.addEventListener('load', buildAll);
-            resize();
-            requestAnimationFrame(frame);
-        })();
-    </script>
-
+  window.addEventListener('resize',resize);
+  window.addEventListener('load',buildAll);
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
 </body>
 </html>
