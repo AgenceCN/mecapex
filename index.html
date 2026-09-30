@@ -63,13 +63,13 @@
             object-fit: cover;
         }
 
-        /* --- CANVAS DES PARTICULES 3D --- */
-        #wave-canvas {
+        /* --- CANVAS DES SATELLITES (aura autour des cadres) --- */
+        #aura-canvas {
             position: fixed;
             inset: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
+            z-index: 5;
             pointer-events: none;
         }
 
@@ -96,15 +96,20 @@
         .glass-panel {
             background: transparent;
             border: 1px solid rgba(255, 255, 255, 0.35);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+            box-shadow:
+                0 8px 32px 0 rgba(0, 0, 0, 0.25),
+                0 0 22px 2px rgba(56, 189, 248, 0.12);   /* lueur d'aura douce */
             border-radius: 16px;
-            transition: background 0.3s ease, border-color 0.3s ease;
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .glass-panel:hover {
             animation: shake 0.4s ease-in-out infinite alternate;
             background: rgba(255, 255, 255, 0.05);
             border-color: rgba(255, 255, 255, 0.6);
+            box-shadow:
+                0 8px 32px 0 rgba(0, 0, 0, 0.25),
+                0 0 34px 4px rgba(56, 189, 248, 0.28);
         }
 
         .glass-panel h1, .glass-panel h2, .glass-panel p, .glass-panel span, .glass-panel li {
@@ -204,8 +209,6 @@
             min-width: 0;
         }
 
-        /* Fenêtre de la vidéo : taille réduite de 30 % (220px -> 154px)
-           et largeur visible = 40 % de la vidéo (30 % coupés de chaque côté) */
         .hero-video-wrap {
             flex: 0 0 28%;
             height: 154px;
@@ -216,8 +219,6 @@
             position: relative;
         }
 
-        /* La vidéo fait 250 % de la fenêtre (= 70 % de la largeur d'origine),
-           décalée de 75 % pour ne montrer que la partie centrale (40 %) */
         .hero-video-wrap video {
             position: absolute;
             top: 0;
@@ -363,7 +364,6 @@
             .side-panel { width: 100%; }
         }
 
-        /* Sur petit écran : texte au-dessus, vidéo en dessous */
         @media (max-width: 700px) {
             .hero-banner {
                 flex-direction: column;
@@ -396,10 +396,10 @@
         </video>
     </div>
 
-    <!-- PARTICULES 3D EN FORME DE VAGUES -->
-    <canvas id="wave-canvas"></canvas>
-
     <div class="bg-overlay"></div>
+
+    <!-- SATELLITES / AURA AUTOUR DES CADRES -->
+    <canvas id="aura-canvas"></canvas>
 
     <div class="app-container">
 
@@ -482,9 +482,6 @@
 
     </div>
 
-    <!-- three.js (bibliothèque 3D) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
     <script>
         // ===== LECTURE FORCÉE DE TOUTES LES VIDÉOS =====
         const videos = document.querySelectorAll('video');
@@ -497,117 +494,163 @@
             });
         });
 
-        // ===== PARTICULES 3D : VAGUES DE MER =====
+        // ===== PARTICULES SATELLITES AUTOUR DES CADRES =====
         (function () {
-            if (typeof THREE === 'undefined') return;
 
             // --- Réglages ---
-            const FIELD_WIDTH  = 1000;   // largeur du champ (unités 3D)
-            const FIELD_DEPTH  = 5000;   // longueur du champ (unités 3D)
-            const isMobile     = window.innerWidth < 768;
-            const COLS         = isMobile ? 50  : 80;    // particules en largeur
-            const ROWS         = isMobile ? 160 : 260;   // particules en profondeur
-            const PARTICLE_SIZE = isMobile ? 20 : 16;    // taille (x4 par rapport à avant)
-            const PARTICLE_COLOR = 0xd1d5db;             // gris clair
-            const WAVE_SPEED   = 1;                      // vitesse des vagues
-            const WAVE_HEIGHT  = 1;                      // amplitude des vagues
+            const CONFIG = {
+                density:       1 / 11,   // particules par pixel de périmètre (plus grand = plus de particules)
+                maxPerPanel:   140,      // plafond de particules par cadre
+                speedMin:      35,       // vitesse minimale (px/s)
+                speedMax:      110,      // vitesse maximale (px/s)
+                distMin:       6,        // distance minimale au cadre (px)
+                distMax:       30,       // distance maximale au cadre (px)
+                wobble:        5,        // amplitude d'oscillation radiale (px)
+                sizeMin:       2.5,      // taille minimale (px)
+                sizeMax:       6,        // taille maximale (px)
+                tailLength:    4,        // nombre de points de traînée
+                tailSpacing:   9,        // écart entre les points de traînée (px)
+                cyanRatio:     0.65,     // part de particules cyan (le reste = blanc)
+                reverseRatio:  0.3,      // part de particules qui tournent dans l'autre sens
+                cornerRadius:  16        // rayon des coins des cadres (doit suivre le CSS)
+            };
 
-            const canvas = document.getElementById('wave-canvas');
-            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: false });
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.setClearColor(0x000000, 0);
+            const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const isMobile = window.innerWidth < 768;
+            const density = isMobile ? CONFIG.density * 0.6 : CONFIG.density;
 
-            const scene = new THREE.Scene();
-            scene.fog = new THREE.Fog(0x0b0f19, 900, 4200);
-
-            const camera = new THREE.PerspectiveCamera(60, 1, 1, 6000);
-            camera.position.set(0, 230, 700);
-
-            // Texture ronde pour les particules
-            const sprite = document.createElement('canvas');
-            sprite.width = sprite.height = 64;
-            const ctx = sprite.getContext('2d');
-            const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-            grad.addColorStop(0, 'rgba(255,255,255,1)');
-            grad.addColorStop(0.4, 'rgba(255,255,255,0.8)');
-            grad.addColorStop(1, 'rgba(255,255,255,0)');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, 64, 64);
-            const texture = new THREE.CanvasTexture(sprite);
-
-            // Géométrie : grille de points
-            const count = COLS * ROWS;
-            const positions = new Float32Array(count * 3);
-            const baseX = new Float32Array(count);
-            const baseZ = new Float32Array(count);
-
-            let i = 0;
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c < COLS; c++) {
-                    const x = (c / (COLS - 1) - 0.5) * FIELD_WIDTH;
-                    const z = 500 - (r / (ROWS - 1)) * FIELD_DEPTH;
-                    baseX[i] = x;
-                    baseZ[i] = z;
-                    positions[i * 3]     = x;
-                    positions[i * 3 + 1] = 0;
-                    positions[i * 3 + 2] = z;
-                    i++;
-                }
-            }
-
-            const geometry = new THREE.BufferGeometry();
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-            const material = new THREE.PointsMaterial({
-                color: PARTICLE_COLOR,
-                size: PARTICLE_SIZE,
-                map: texture,
-                transparent: true,
-                opacity: 0.85,
-                depthWrite: false,
-                sizeAttenuation: true
-            });
-
-            const points = new THREE.Points(geometry, material);
-            scene.add(points);
+            const canvas = document.getElementById('aura-canvas');
+            const ctx = canvas.getContext('2d');
+            let W = 0, H = 0, dpr = 1;
 
             function resize() {
-                const w = window.innerWidth;
-                const h = window.innerHeight;
-                renderer.setSize(w, h, false);
-                camera.aspect = w / h;
-                camera.updateProjectionMatrix();
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+                W = window.innerWidth;
+                H = window.innerHeight;
+                canvas.width = W * dpr;
+                canvas.height = H * dpr;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                buildAll();
             }
-            window.addEventListener('resize', resize);
-            resize();
 
-            const clock = new THREE.Clock();
+            // Sprites lumineux pré-rendus (rapide)
+            function makeSprite(r, g, b) {
+                const s = document.createElement('canvas');
+                s.width = s.height = 64;
+                const c = s.getContext('2d');
+                const grad = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+                grad.addColorStop(0,    `rgba(${r},${g},${b},1)`);
+                grad.addColorStop(0.25, `rgba(${r},${g},${b},0.75)`);
+                grad.addColorStop(1,    `rgba(${r},${g},${b},0)`);
+                c.fillStyle = grad;
+                c.fillRect(0, 0, 64, 64);
+                return s;
+            }
+            const spriteCyan  = makeSprite(56, 189, 248);
+            const spriteWhite = makeSprite(230, 245, 255);
 
-            function animate() {
-                requestAnimationFrame(animate);
-                const t = clock.getElapsedTime() * WAVE_SPEED;
-                const pos = geometry.attributes.position.array;
+            // Position sur un rectangle arrondi (coordonnées locales), s = distance parcourue en px
+            function pointOnRoundedRect(w, h, r, s) {
+                r = Math.min(r, w / 2, h / 2);
+                const a = w - 2 * r;            // segments horizontaux
+                const b = h - 2 * r;            // segments verticaux
+                const q = Math.PI * r / 2;      // quart de cercle
+                const P = 2 * a + 2 * b + 4 * q;
+                s = ((s % P) + P) % P;
 
-                for (let k = 0; k < count; k++) {
-                    const x = baseX[k];
-                    const z = baseZ[k];
-                    const y =
-                        Math.sin(x * 0.012 + t * 1.1) * 28 +
-                        Math.sin(z * 0.006 + t * 1.6) * 48 +
-                        Math.sin((x + z) * 0.008 + t * 0.8) * 22 +
-                        Math.cos(x * 0.02 - z * 0.004 + t * 0.6) * 12;
-                    pos[k * 3 + 1] = y * WAVE_HEIGHT;
+                if (s < a) return [r + s, 0];
+                s -= a;
+                if (s < q) { const t = -Math.PI / 2 + s / r; return [w - r + Math.cos(t) * r, r + Math.sin(t) * r]; }
+                s -= q;
+                if (s < b) return [w, r + s];
+                s -= b;
+                if (s < q) { const t = s / r; return [w - r + Math.cos(t) * r, h - r + Math.sin(t) * r]; }
+                s -= q;
+                if (s < a) return [w - r - s, h];
+                s -= a;
+                if (s < q) { const t = Math.PI / 2 + s / r; return [r + Math.cos(t) * r, h - r + Math.sin(t) * r]; }
+                s -= q;
+                if (s < b) return [0, h - r - s];
+                s -= b;
+                { const t = Math.PI + s / r; return [r + Math.cos(t) * r, r + Math.sin(t) * r]; }
+            }
+
+            const rand = (min, max) => min + Math.random() * (max - min);
+
+            // Un ensemble de satellites par cadre
+            const panels = [];
+
+            function buildAll() {
+                panels.length = 0;
+                document.querySelectorAll('.glass-panel').forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const perimeter = 2 * (rect.width + rect.height);
+                    const n = Math.min(CONFIG.maxPerPanel, Math.max(12, Math.round(perimeter * density)));
+                    const parts = [];
+                    for (let i = 0; i < n; i++) {
+                        const dir = Math.random() < CONFIG.reverseRatio ? -1 : 1;
+                        parts.push({
+                            s:      Math.random() * perimeter,
+                            speed:  rand(CONFIG.speedMin, CONFIG.speedMax) * dir,
+                            dist:   rand(CONFIG.distMin, CONFIG.distMax),
+                            phase:  Math.random() * Math.PI * 2,
+                            freq:   rand(0.6, 1.8),
+                            size:   rand(CONFIG.sizeMin, CONFIG.sizeMax),
+                            sprite: Math.random() < CONFIG.cyanRatio ? spriteCyan : spriteWhite,
+                            alpha:  rand(0.55, 1)
+                        });
+                    }
+                    panels.push({ el, parts, basePerimeter: perimeter });
+                });
+            }
+
+            let last = performance.now();
+            let time = 0;
+
+            function frame(now) {
+                requestAnimationFrame(frame);
+                const dt = Math.min((now - last) / 1000, 0.05);
+                last = now;
+                time += dt;
+                const speedFactor = reduced ? 0.15 : 1;
+
+                ctx.clearRect(0, 0, W, H);
+                ctx.globalCompositeOperation = 'lighter';
+
+                for (const p of panels) {
+                    const rect = p.el.getBoundingClientRect();   // inclut flottaison et tremblement
+                    if (rect.bottom < -60 || rect.top > H + 60 || rect.width === 0) continue;
+
+                    for (const part of p.parts) {
+                        part.s += part.speed * speedFactor * dt;
+
+                        const d = part.dist + Math.sin(time * part.freq + part.phase) * CONFIG.wobble;
+                        const w = rect.width  + 2 * d;
+                        const h = rect.height + 2 * d;
+                        const r = CONFIG.cornerRadius + d;
+                        const ox = rect.left - d;
+                        const oy = rect.top  - d;
+                        const dir = part.speed >= 0 ? 1 : -1;
+
+                        // Traînée (queue derrière la particule) puis tête
+                        for (let k = CONFIG.tailLength; k >= 0; k--) {
+                            const [x, y] = pointOnRoundedRect(w, h, r, part.s - dir * k * CONFIG.tailSpacing);
+                            const fade = 1 - k / (CONFIG.tailLength + 1);
+                            const size = part.size * (0.35 + 0.65 * fade) * 3;   // le sprite inclut le halo
+                            ctx.globalAlpha = part.alpha * fade * fade;
+                            ctx.drawImage(part.sprite, ox + x - size / 2, oy + y - size / 2, size, size);
+                        }
+                    }
                 }
-                geometry.attributes.position.needsUpdate = true;
 
-                // Léger balancement de caméra
-                camera.position.x = Math.sin(t * 0.15) * 60;
-                camera.position.y = 230 + Math.sin(t * 0.25) * 20;
-                camera.lookAt(0, 0, -1500);
-
-                renderer.render(scene, camera);
+                ctx.globalAlpha = 1;
+                ctx.globalCompositeOperation = 'source-over';
             }
-            animate();
+
+            window.addEventListener('resize', resize);
+            window.addEventListener('load', buildAll);   // recalcule une fois la mise en page finale chargée
+            resize();
+            requestAnimationFrame(frame);
         })();
     </script>
 
