@@ -107,14 +107,7 @@
             border-color: rgba(255, 255, 255, 0.6);
         }
 
-        /* Cadres centraux : cadre filaire supprimé (bordure invisible, même au survol) */
-        .hero-banner,
-        .info-card,
-        .hero-banner:hover,
-        .info-card:hover {
-            border-color: transparent;
-        }
-
+        /* Lueur neutre (blanche) sur les cadres centraux */
         .hero-banner,
         .info-card {
             box-shadow:
@@ -511,23 +504,24 @@
             });
         });
 
-        // ===== PARTICULES GRIS ANTHRACITE QUI DÉAMBULENT DANS LES CADRES CENTRAUX =====
+        // ===== PARTICULES GRIS CLAIR QUI DÉAMBULENT DANS LES CADRES CENTRAUX =====
         (function () {
 
             // --- Réglages ---
             const CONFIG = {
-                selector:      '.hero-banner, .info-card',  // uniquement les cadres centraux
-                density:       (50 / 13) * 0.7,  // particules par pixel de périmètre (−30 %)
-                maxPerPanel:   3150,     // plafond de particules par cadre (4500 x 0,7)
-                zoneMin:       -1e6,     // limite intérieure (aucune : tout l'intérieur du cadre)
-                zoneMax:       -4,       // les particules restent à au moins 4 px à l'intérieur du bord
-                speedMin:      8.4,      // vitesse minimale (px/s)
-                speedMax:      67.2,     // vitesse maximale (px/s)
-                pauseChance:   0.18,     // probabilité de s'arrêter un instant
-                turnFactor:    0.9,      // amplitude des virages
-                sizeMin:       1.75,     // taille minimale (px)  [2,5 x 0,7]
-                sizeMax:       4.2,      // taille maximale (px)  [6 x 0,7]
-                cornerRadius:  16        // rayon des coins (doit suivre le CSS)
+                selector:       '.hero-banner, .info-card',  // uniquement les cadres centraux
+                density:        (50 / 13) * 0.7 * 0.4,  // particules par pixel de périmètre (−60 %)
+                maxPerPanel:    1260,    // plafond de particules par cadre (3150 x 0,4)
+                zoneMin:        -1e6,    // limite intérieure (aucune : tout l'intérieur du cadre)
+                zoneMax:        -4,      // les particules restent à au moins 4 px à l'intérieur du bord
+                speedMin:       8.4,     // vitesse minimale (px/s)
+                speedMax:       67.2,    // vitesse maximale (px/s)
+                pauseChance:    0.18,    // probabilité de s'arrêter un instant
+                turnFactor:     0.9,     // amplitude des virages
+                verticalFactor: 0.55,    // amplitude du mouvement en hauteur (1 = normal, plus petit = plus plat)
+                sizeMin:        1.75,    // taille minimale (px)
+                sizeMax:        4.2,     // taille maximale (px)
+                cornerRadius:   16       // rayon des coins (doit suivre le CSS)
             };
 
             const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -540,8 +534,8 @@
             const ctx = canvas.getContext('2d');
             let W = 0, H = 0, dpr = 1;
 
-            // Sprites en nuances de gris anthracite (aucune couleur)
-            const GRAYS = [42, 50, 58, 66, 74, 84];
+            // Sprites en nuances de gris clair (aucune couleur)
+            const GRAYS = [165, 180, 194, 208, 222, 236];
             const sprites = GRAYS.map(g => {
                 const s = document.createElement('canvas');
                 s.width = s.height = 64;
@@ -664,8 +658,9 @@
                 p.vx += (dx - p.vx) * k;
                 p.vy += (dy - p.vy) * k;
 
+                // Le déplacement vertical est atténué : amplitude en hauteur réduite
                 p.x += p.vx * dt;
-                p.y += p.vy * dt;
+                p.y += p.vy * CONFIG.verticalFactor * dt;
 
                 // Sécurité : ne jamais dépasser le bord du cadre
                 sdfRoundedRect(p.x - hw, p.y - hh, hw, hh, CONFIG.cornerRadius, tmp);
@@ -689,7 +684,7 @@
                 const speedFactor = reduced ? 0.15 : 1;
 
                 ctx.clearRect(0, 0, W, H);
-                ctx.globalCompositeOperation = 'source-over';   // gris anthracite fidèle (pas d'éclaircissement)
+                ctx.globalCompositeOperation = 'source-over';
 
                 for (const pn of panels) {
                     const rect = pn.el.getBoundingClientRect();   // suit la flottaison et le tremblement
