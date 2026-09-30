@@ -63,7 +63,7 @@
             object-fit: cover;
         }
 
-        /* --- CANVAS DES SATELLITES (aura autour des cadres centraux) --- */
+        /* --- CANVAS DES PARTICULES (cadres centraux) --- */
         #aura-canvas {
             position: fixed;
             inset: 0;
@@ -107,7 +107,7 @@
             border-color: rgba(255, 255, 255, 0.6);
         }
 
-        /* Lueur d'aura neutre (blanche) uniquement sur les cadres centraux */
+        /* Lueur neutre (blanche) uniquement sur les cadres centraux */
         .hero-banner,
         .info-card {
             box-shadow:
@@ -408,7 +408,7 @@
 
     <div class="bg-overlay"></div>
 
-    <!-- PARTICULES AUTOUR DES CADRES CENTRAUX -->
+    <!-- PARTICULES DANS LES CADRES CENTRAUX -->
     <canvas id="aura-canvas"></canvas>
 
     <div class="app-container">
@@ -504,29 +504,30 @@
             });
         });
 
-        // ===== PARTICULES GRISES QUI DÉAMBULENT AUTOUR DES CADRES CENTRAUX =====
+        // ===== PARTICULES GRISES QUI DÉAMBULENT DANS LES CADRES CENTRAUX =====
         (function () {
 
             // --- Réglages ---
             const CONFIG = {
                 selector:      '.hero-banner, .info-card',  // uniquement les cadres centraux
-                density:       1 / 13,   // particules par pixel de périmètre
-                maxPerPanel:   90,       // plafond de particules par cadre
-                zoneMin:       7,        // distance minimale au cadre (px)
-                zoneMax:       40,       // distance maximale au cadre (px)
-                speedMin:      6,        // vitesse minimale de déambulation (px/s)
-                speedMax:      48,       // vitesse maximale de déambulation (px/s)
+                density:       50 / 13,  // particules par pixel de périmètre (x50 par rapport à avant)
+                maxPerPanel:   4500,     // plafond de particules par cadre (90 x 50)
+                zoneMin:       -1e6,     // limite intérieure (aucune : tout l'intérieur du cadre)
+                zoneMax:       -4,       // les particules restent à au moins 4 px à l'intérieur du bord
+                speedMin:      8.4,      // vitesse minimale (px/s)   [6 x 1,4]
+                speedMax:      67.2,     // vitesse maximale (px/s)   [48 x 1,4]
                 pauseChance:   0.18,     // probabilité de s'arrêter un instant
+                turnFactor:    0.9,      // amplitude des virages (réduite de 10 %)
                 sizeMin:       2.5,      // taille minimale (px)
                 sizeMax:       6,        // taille maximale (px)
-                tailLength:    3,        // points de traînée
-                tailSpacing:   7,        // écart des points de traînée (px)
                 cornerRadius:  16        // rayon des coins (doit suivre le CSS)
             };
 
             const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             const isMobile = window.innerWidth < 768;
-            const density = isMobile ? CONFIG.density * 0.6 : CONFIG.density;
+            const mobileFactor = isMobile ? 0.6 : 1;
+            const density = CONFIG.density * mobileFactor;
+            const maxPerPanel = Math.round(CONFIG.maxPerPanel * mobileFactor);
 
             const canvas = document.getElementById('aura-canvas');
             const ctx = canvas.getContext('2d');
@@ -551,7 +552,7 @@
             const angDiff = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
 
             // Distance signée à un rectangle arrondi + normale sortante
-            // (coordonnées relatives au centre du cadre)
+            // (coordonnées relatives au centre du cadre ; d < 0 = à l'intérieur)
             function sdfRoundedRect(px, py, hw, hh, r, out) {
                 const qx = Math.abs(px) - (hw - r);
                 const qy = Math.abs(py) - (hh - r);
@@ -573,27 +574,26 @@
             }
 
             const tmp = { d: 0, nx: 0, ny: 0 };
-
             const panels = [];
 
             function makeParticle(w, h) {
                 const hw = w / 2, hh = h / 2;
-                // Position de départ aléatoire dans la zone autour du cadre
-                let x = 0, y = 0, ok = false;
-                for (let t = 0; t < 60 && !ok; t++) {
-                    x = rand(-CONFIG.zoneMax, w + CONFIG.zoneMax);
-                    y = rand(-CONFIG.zoneMax, h + CONFIG.zoneMax);
+                // Position de départ aléatoire à l'intérieur du cadre
+                let x = hw, y = hh, ok = false;
+                for (let t = 0; t < 40 && !ok; t++) {
+                    x = rand(0, w);
+                    y = rand(0, h);
                     sdfRoundedRect(x - hw, y - hh, hw, hh, CONFIG.cornerRadius, tmp);
-                    ok = tmp.d >= CONFIG.zoneMin && tmp.d <= CONFIG.zoneMax;
+                    ok = tmp.d <= CONFIG.zoneMax && tmp.d >= CONFIG.zoneMin;
                 }
-                if (!ok) { x = -CONFIG.zoneMin - 2; y = hh; }
+                if (!ok) { x = hw; y = hh; }
 
                 const theta = rand(0, Math.PI * 2);
                 const target = Math.random() < CONFIG.pauseChance ? 0 : rand(CONFIG.speedMin, CONFIG.speedMax);
                 return {
                     x, y,
                     theta,                              // direction de marche
-                    omega: rand(-1, 1),                 // vitesse de virage
+                    omega: rand(-1, 1) * CONFIG.turnFactor,
                     vx: Math.cos(theta) * target,
                     vy: Math.sin(theta) * target,
                     target,                             // vitesse souhaitée
@@ -609,7 +609,7 @@
                 document.querySelectorAll(CONFIG.selector).forEach(el => {
                     const rect = el.getBoundingClientRect();
                     const perimeter = 2 * (rect.width + rect.height);
-                    const n = Math.min(CONFIG.maxPerPanel, Math.max(10, Math.round(perimeter * density)));
+                    const n = Math.min(maxPerPanel, Math.max(10, Math.round(perimeter * density)));
                     const parts = [];
                     for (let i = 0; i < n; i++) parts.push(makeParticle(rect.width, rect.height));
                     panels.push({ el, parts, motion: 1, w: rect.width, h: rect.height });
@@ -635,18 +635,19 @@
                 }
 
                 // Errance : la direction dérive de façon aléatoire et douce
-                p.omega += rand(-1, 1) * 2.5 * dt;
+                const maxTurn = 1.6 * CONFIG.turnFactor;
+                p.omega += rand(-1, 1) * 2.5 * CONFIG.turnFactor * dt;
                 p.omega *= (1 - Math.min(1, dt * 0.8));
-                p.omega = Math.max(-1.6, Math.min(1.6, p.omega));
+                p.omega = Math.max(-maxTurn, Math.min(maxTurn, p.omega));
                 p.theta += p.omega * dt;
 
-                // Rester dans la zone d'aura : se détourner du cadre ou revenir vers lui
+                // Rester à l'intérieur du cadre : se détourner du bord
                 sdfRoundedRect(p.x - hw, p.y - hh, hw, hh, CONFIG.cornerRadius, tmp);
                 let steer = null;
-                if (tmp.d > CONFIG.zoneMax - 6) steer = Math.atan2(-tmp.ny, -tmp.nx);
+                if (tmp.d > CONFIG.zoneMax - 8) steer = Math.atan2(-tmp.ny, -tmp.nx);
                 else if (tmp.d < CONFIG.zoneMin + 5) steer = Math.atan2(tmp.ny, tmp.nx);
                 if (steer !== null) {
-                    p.theta += angDiff(steer, p.theta) * Math.min(1, dt * 3.2);
+                    p.theta += angDiff(steer, p.theta) * Math.min(1, dt * 4);
                 }
 
                 // Vitesse lissée vers la vitesse souhaitée
@@ -659,16 +660,16 @@
                 p.x += p.vx * dt;
                 p.y += p.vy * dt;
 
-                // Sécurité : ne jamais entrer dans le cadre ni trop s'en éloigner
+                // Sécurité : ne jamais dépasser le bord du cadre
                 sdfRoundedRect(p.x - hw, p.y - hh, hw, hh, CONFIG.cornerRadius, tmp);
-                if (tmp.d < CONFIG.zoneMin - 2) {
-                    const push = CONFIG.zoneMin - 2 - tmp.d;
-                    p.x += tmp.nx * push;
-                    p.y += tmp.ny * push;
-                } else if (tmp.d > CONFIG.zoneMax + 6) {
-                    const pull = tmp.d - (CONFIG.zoneMax + 6);
+                if (tmp.d > CONFIG.zoneMax) {
+                    const pull = tmp.d - CONFIG.zoneMax;
                     p.x -= tmp.nx * pull;
                     p.y -= tmp.ny * pull;
+                } else if (tmp.d < CONFIG.zoneMin) {
+                    const push = CONFIG.zoneMin - tmp.d;
+                    p.x += tmp.nx * push;
+                    p.y += tmp.ny * push;
                 }
             }
 
@@ -698,22 +699,10 @@
                     for (const p of pn.parts) {
                         if (step > 0) updateParticle(p, hw, hh, step);
 
-                        const sp = Math.hypot(p.vx, p.vy);
-                        const dirX = sp > 0.01 ? p.vx / sp : 0;
-                        const dirY = sp > 0.01 ? p.vy / sp : 0;
-                        const tailScale = Math.min(1, sp / 30) * pn.motion;
-
-                        // Position écran = position locale + coin du cadre
-                        const bx = rect.left + p.x;
-                        const by = rect.top  + p.y;
-
-                        for (let k = CONFIG.tailLength; k >= 0; k--) {
-                            const off = k * CONFIG.tailSpacing * tailScale;
-                            const fade = 1 - k / (CONFIG.tailLength + 1);
-                            const size = p.size * (0.4 + 0.6 * fade) * 3;
-                            ctx.globalAlpha = p.alpha * fade * fade;
-                            ctx.drawImage(p.sprite, bx - dirX * off - size / 2, by - dirY * off - size / 2, size, size);
-                        }
+                        // Un seul point par particule
+                        const size = p.size * 3;   // le sprite inclut son halo
+                        ctx.globalAlpha = p.alpha;
+                        ctx.drawImage(p.sprite, rect.left + p.x - size / 2, rect.top + p.y - size / 2, size, size);
                     }
                 }
 
